@@ -11,4 +11,16 @@ public final class UserInput {
     private String email;
     private String birthDate;
     private String occupation;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
 }

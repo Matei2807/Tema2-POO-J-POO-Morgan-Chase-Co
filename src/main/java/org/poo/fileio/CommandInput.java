@@ -34,4 +34,100 @@ public final class CommandInput {
     private double minBalance;
     private List<String> accounts;
     private List<Double> amountForUsers;
+
+    public String getCommand() {
+        return command;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public double getMinBalance() {
+        return minBalance;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public String getCommerciant() {
+        return commerciant;
+    }
+
+    public int getTimestamp() {
+        return timestamp;
+    }
+
+    public int getStartTimestamp() {
+        return startTimestamp;
+    }
+
+    public int getEndTimestamp() {
+        return endTimestamp;
+    }
+
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public double getInterestRate() {
+        return interestRate;
+    }
+
+    public List<String> getAccounts() {
+        return accounts;
+    }
+
+    public void setCurrency(final String currency) {
+        this.currency = currency;
+    }
+
+    public void setCardNumber(final String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    public void setAccount(final String accountNumber) {
+        this.account = accountNumber;
+    }
+
+    public void setEmail(final String email) {
+        this.email = email;
+    }
+
+    public void setAmmount(final double newAmount) {
+        this.amount = newAmount;
+    }
+
+    public void setTimestamp(final int timestamp) {
+        this.timestamp = timestamp;
+    }
 }

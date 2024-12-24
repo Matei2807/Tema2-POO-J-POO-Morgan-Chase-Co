@@ -10,4 +10,36 @@ public final class ExchangeInput {
     private String to;
     private double rate;
     private int timestamp;
+
+    public String getFrom() {
+        return from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public double getRate() {
+        return rate;
+    }
+
+    public int getTimestamp() {
+        return timestamp;
+    }
+
+    public void setFrom(final String from) {
+        this.from = from;
+    }
+
+    public void setTo(final String to) {
+        this.to = to;
+    }
+
+    public void setRate(final double rate) {
+        this.rate = rate;
+    }
+
+    public void setTimestamp(final int timestamp) {
+        this.timestamp = timestamp;
+    }
 }
