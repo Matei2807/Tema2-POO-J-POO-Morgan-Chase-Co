@@ -18,12 +18,19 @@ public final class CommerciantInput {
         return id;
     }
 
-    //TODO: Implement the getters for the other fields
-//    public String getDescription() {
-//        return description;
-//    }
-//
-//    public List<String> getCommerciants() {
-//        return commerciants;
-//    }
+    public String getCommerciant() {
+        return commerciant;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getCashbackStrategy() {
+        return cashbackStrategy;
+    }
 }

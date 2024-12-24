@@ -2,10 +2,7 @@ package org.poo.main;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.poo.fileio.CommandInput;
-import org.poo.fileio.ExchangeInput;
-import org.poo.fileio.ObjectInput;
-import org.poo.fileio.UserInput;
+import org.poo.fileio.*;
 import org.poo.main.Accounts.Account;
 import org.poo.main.Accounts.CurrentAccount;
 import org.poo.main.Accounts.NullAccount;
@@ -27,21 +24,28 @@ public final class Bank {
     private List<User> users = new ArrayList<>();
     private List<ExchangeRate> exchangeRates = new ArrayList<>();
     private Map<String, String> aliases = new HashMap<>(); // map alias -> accountNumber
+    private List<Commerciant> commerciants = new ArrayList<>();
 
     public Bank(final ObjectInput inputData) {
         for (UserInput userInput : inputData.getUsers()) {
             users.add(new User(userInput));
         }
-        for (ExchangeInput exchangeInput : inputData.getExchangeRates()) {
-            exchangeRates.add(new ExchangeRate(exchangeInput));
+        for (CommerciantInput commerciantInput : inputData.getCommerciants()) {
+            commerciants.add(new Commerciant(commerciantInput));
+        }
 
-            // also add the inverted rate
-            ExchangeInput invertedRate = new ExchangeInput();
-            invertedRate.setFrom(exchangeInput.getTo());
-            invertedRate.setTo(exchangeInput.getFrom());
-            invertedRate.setRate(1 / exchangeInput.getRate());
-            invertedRate.setTimestamp(exchangeInput.getTimestamp());
-            exchangeRates.add(new ExchangeRate(invertedRate));
+        if(inputData.getExchangeRates() != null) {
+            for (ExchangeInput exchangeInput : inputData.getExchangeRates()) {
+                exchangeRates.add(new ExchangeRate(exchangeInput));
+
+                // also add the inverted rate
+                ExchangeInput invertedRate = new ExchangeInput();
+                invertedRate.setFrom(exchangeInput.getTo());
+                invertedRate.setTo(exchangeInput.getFrom());
+                invertedRate.setRate(1 / exchangeInput.getRate());
+                invertedRate.setTimestamp(exchangeInput.getTimestamp());
+                exchangeRates.add(new ExchangeRate(invertedRate));
+            }
         }
     }
 
@@ -109,11 +113,82 @@ public final class Bank {
                 case "spendingsReport":
                     spendingReport(command, output);
                     break;
+                case "upgradePlan":
+                    upgradePlan(command, output);
+                    break;
+                case "withdrawSavings":
+                    withdrawSavings(command, output);
+                    break;
+                case "addNewBusinessAssociate":
+                    addNewBusinessAssociate(command, output);
+                    break;
+                case "changeSpendingLimit":
+                    changeSpendingLimit(command, output);
+                    break;
+                case "changeDepositLimit":
+                    changeDepositLimit(command, output);
+                    break;
+                case "cashWithdrawal":
+                    cashWithdrawal(command, output);
+                    break;
                 default:
                     System.out.println("Invalid command: " + command.getCommand());
                     break;
             }
         }
+    }
+
+    private void cashWithdrawal(CommandInput command, ArrayNode output) {
+    }
+
+    private void changeDepositLimit(CommandInput command, ArrayNode output) {
+    }
+
+    private void changeSpendingLimit(CommandInput command, ArrayNode output) {
+    }
+
+    private void addNewBusinessAssociate(CommandInput command, ArrayNode output) {
+    }
+
+    private void withdrawSavings(CommandInput command, ArrayNode output) {
+        String account = command.getAccount();
+        double amount = command.getAmount();
+        String currency = command.getCurrency();
+        int timestamp = command.getTimestamp();
+
+        // withdraw the amount from the savings account to the first current account with the given currency, else to the first current account
+        // also check for commission
+
+        // Possible outputs:
+        /*
+        “Savings withdrawal”
+        “You don't have the minimum age required.” (21 years)
+        “You do not have a classic account.”
+        “Account is not of type savings.”
+        “Insufficient funds”
+        “Account not found”
+         */
+    }
+
+    private void upgradePlan(CommandInput command, ArrayNode output) {
+        String newPlanType = command.getNewPlanType();
+        String account = command.getAccount();
+        int timestamp = command.getTimestamp();
+        /*
+        standard/ student to silver: 100RON fee
+        silver to gold: 250RON fee
+        standard/ student to gold: 350RON fee
+         */
+
+
+        // Possible outputs:
+        /*
+        “Upgrade plan”
+        “The user already has the ${newPlanType} plan.”
+        “You cannot downgrade your plan.”
+        “Insufficient funds”
+        “Account not found”
+         */
     }
 
     private void printUsers(final CommandInput command, final ArrayNode output) {
@@ -190,9 +265,9 @@ public final class Bank {
 
         Account newAccount;
         if (command.getAccountType().equals("savings")) {
-            newAccount = new SavingsAccount(command);
+            newAccount = new SavingsAccount(command, user);
         } else {
-            newAccount = new CurrentAccount(command);
+            newAccount = new CurrentAccount(command, user);
         }
         user.addAccount(newAccount);
 
@@ -296,6 +371,8 @@ public final class Bank {
 
         Account account = getAccountByIBAN(accountNumber);
 
+        // TODO: if it is a business account, the owner account should be checked
+
         account.setMinBalance(minBalance);
         account.setMinBalanceTimestamp(timestamp);
         if (account.getBalance() < minBalance) {
@@ -395,7 +472,7 @@ public final class Bank {
             user.addTransaction(transaction2);
             return;
         }
-
+        // else the user has enough funds
         User userByEmail = getUserByEmail(email);
         if (userByEmail.isNull() || userByEmail.getAccount(account.getAccountNumber()) == null) {
             System.out.println("User not found for email: " + email);
@@ -411,14 +488,41 @@ public final class Bank {
                                                             "");
         userByEmail.addTransaction(transaction);
 
-        // adds new commerciant to the account
-        if (account.findCommerciant(commerciantName) == null) {
-            Commerciant commerciant = new Commerciant(commerciantName);
-            commerciant.addSale(convertedAmount);
-            account.addCommerciant(commerciant);
-        } else { // adds the sale to the existing commerciant
-            account.findCommerciant(commerciantName).addSale(convertedAmount);
+        //TODO : future check for cashback
+        Map<String, Double> cashbackMap = account.getCashbackMap();
+        if (cashbackMap.get("All") != 0.0) {
+            double cashback = cashbackMap.get("All") * amount * exchangeRate; // TODO : check currency
+            account.addFunds(cashback);
+        } else {
+            // find the commerciant in the list of commerciants by name
+            Commerciant commerciant = null;
+            for (Commerciant c : commerciants) {
+                if (c.getName().equals(commerciantName)) {
+                    commerciant = c;
+                    break;
+                }
+            }
+            if (commerciant == null) {
+                System.out.println("ERROR: Commerciant not found: " + commerciantName);
+                return;
+            }
+
+            if (cashbackMap.containsKey(commerciant.getType())) {
+                double cashback = cashbackMap.get(commerciant.getType()) * amount * exchangeRate; // TODO : check currency
+                account.addFunds(cashback);
+            }
         }
+
+        // adds the sale to the commerciant for the account
+        Commerciant commerciant = account.findCommerciant(commerciantName);
+        if (commerciant == null) { // if the commerciant is not found, create a new one
+            commerciant = new Commerciant(commerciantName);
+        }
+        commerciant.addSale(convertedAmount);
+
+        double exchangeRateRON = getExchangeRate(senderCurrency, "RON");
+        double spentAmountInRON = amount * exchangeRateRON;
+        account.addCommerciant(commerciant , spentAmountInRON);
 
         if (card.isOneTime()) {
             // delete the card
@@ -496,7 +600,7 @@ public final class Bank {
         aliases.put(alias, accountNumber);
     }
 
-    private void splitPayment(final CommandInput command, final ArrayNode output) {
+    private void splitPayment(final CommandInput command, final ArrayNode output) { // TODO: CHANGE(check ocw)
         List<String> accounts = command.getAccounts();
         String currency = command.getCurrency();
         double amount = command.getAmount();

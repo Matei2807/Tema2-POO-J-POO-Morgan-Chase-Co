@@ -2,6 +2,7 @@ package org.poo.main.Users;
 
 import org.poo.fileio.UserInput;
 import org.poo.main.Accounts.Account;
+import org.poo.main.Date;
 import org.poo.main.Transactions.Transaction;
 
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ public class User {
     private String firstName;
     private String lastName;
     private String email;
+    private Date birthDate;
+    private String occupation;
     private List<Account> accounts;
     private List<Transaction> transactions;
     private boolean isNull = false;
@@ -21,6 +24,8 @@ public class User {
         email = userInput.getEmail();
         accounts = new ArrayList<>();
         transactions = new ArrayList<>();
+        birthDate = new Date(userInput.getBirthDate());
+        occupation = userInput.getOccupation();
     }
 
     /**
@@ -117,6 +122,14 @@ public class User {
      */
     public boolean isNull() {
         return isNull;
+    }
+
+    public String getOccupation() {
+        return occupation;
+    }
+
+    public Date getBirthDate() {
+        return birthDate;
     }
 }
 

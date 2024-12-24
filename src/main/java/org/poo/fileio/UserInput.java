@@ -23,4 +23,14 @@ public final class UserInput {
     public String getEmail() {
         return email;
     }
+
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public String getOccupation() {
+        return occupation;
+    }
+
+
 }

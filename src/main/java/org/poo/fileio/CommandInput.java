@@ -130,4 +130,36 @@ public final class CommandInput {
     public void setTimestamp(final int timestamp) {
         this.timestamp = timestamp;
     }
+
+    public String getNewPlanType() {
+        return newPlanType;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public double getSpendingLimit() {
+        return spendingLimit;
+    }
+
+    public double getDepositLimit() {
+        return depositLimit;
+    }
+
+    public List<Double> getAmountForUsers() {
+        return amountForUsers;
+    }
+
+    public String getSplitPaymentType() {
+        return splitPaymentType;
+    }
 }

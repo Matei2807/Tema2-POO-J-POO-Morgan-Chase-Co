@@ -2,11 +2,16 @@ package org.poo.main.Accounts;
 
 import org.poo.fileio.CommandInput;
 import org.poo.main.Card;
+import org.poo.main.Cashback.CashBackHelper;
 import org.poo.main.Commerciant;
+import org.poo.main.Cashback.TransactionInfoForCashback;
+import org.poo.main.Users.User;
 import org.poo.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Account {
     protected String accountNumber;
@@ -15,17 +20,23 @@ public abstract class Account {
     protected List<Card> cards;
     protected double minBalance;
     protected int minBalanceTimestamp;
-    protected List<Commerciant> commerciants;
-    protected String type;
+    protected Map<Commerciant, TransactionInfoForCashback> commerciants; // // commerciants that the user has interacted with
+    protected String type; // savings, current, business(new)
+    protected String plan; // standard, student, silver, gold // TODO : check for commision using this
+    protected Map<String, Double> cashbackMap; // cashback for future transactions // TODO : use this for cashback
+    protected int paymentsOver300RON; // for upgrading the plan
+
     private boolean isNull = false;
 
-    public Account(final CommandInput command) {
+    public Account(final CommandInput command, final User user) {
         accountNumber = Utils.generateIBAN();
         balance = 0;
         currency = command.getCurrency();
         cards = new ArrayList<>();
-        commerciants = new ArrayList<>();
+        commerciants = new HashMap<>();
         type = command.getAccountType();
+        plan = user.getOccupation().equals("student") ? "student" : "standard";
+        cashbackMap = CashBackHelper.getEmptyCashbackMap();
     }
 
     public Account() { // Constructor for NullAccount
@@ -33,9 +44,11 @@ public abstract class Account {
         balance = 0;
         currency = "";
         cards = new ArrayList<>();
-        commerciants = new ArrayList<>();
+        commerciants = new HashMap<>();
         type = "";
         isNull = true;
+        plan = "";
+        cashbackMap = new HashMap<>();
     }
 
     /**
@@ -170,15 +183,26 @@ public abstract class Account {
      * Add a commerciant to the account
      * @param commerciant the commerciant to add
      */
-    public void addCommerciant(final Commerciant commerciant) {
-        commerciants.add(commerciant);
+    public void addCommerciant(final Commerciant commerciant, final double amount) {
+        if (!commerciants.containsKey(commerciant)) {
+            commerciants.put(commerciant, new TransactionInfoForCashback());
+        }
+        commerciants.get(commerciant).addTransaction(amount);
+        // update cashback map
+        cashbackMap = CashBackHelper.getCashback(commerciants.get(commerciant), commerciant, this);
+
+        // check if the plan should be upgraded(from silver to gold)
+        if (plan.equals("silver")) {
+            paymentsOver300RON += amount >= 300 ? 1 : 0;
+            plan = paymentsOver300RON >= 5 ? "gold" : "silver";
+        }
     }
 
     /**
      * Get the commerciants of the account
      * @return the commerciants
      */
-    public List<Commerciant> getCommerciants() {
+    public Map<Commerciant, TransactionInfoForCashback> getCommerciants() {
         return commerciants;
     }
 
@@ -196,11 +220,19 @@ public abstract class Account {
      * @return the commerciant
      */
     public Commerciant findCommerciant(final String name) {
-        for (Commerciant commerciant : commerciants) {
+        for (Commerciant commerciant : commerciants.keySet()) {
             if (commerciant.getName().equals(name)) {
                 return commerciant;
             }
         }
         return null;
+    }
+
+    public String getPlan() {
+        return plan;
+    }
+
+    public Map<String, Double> getCashbackMap() {
+        return cashbackMap;
     }
 }

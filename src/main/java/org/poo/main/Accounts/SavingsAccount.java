@@ -1,6 +1,7 @@
 package org.poo.main.Accounts;
 
 import org.poo.fileio.CommandInput;
+import org.poo.main.Users.User;
 
 import java.util.Arrays;
 import java.util.OptionalInt;
@@ -8,8 +9,8 @@ import java.util.OptionalInt;
 public final class SavingsAccount extends Account {
     private double interestRate;
 
-    public SavingsAccount(final CommandInput command) {
-        super(command);
+    public SavingsAccount(final CommandInput command, User user) {
+        super(command, user);
         this.interestRate = command.getInterestRate();
     }
 
