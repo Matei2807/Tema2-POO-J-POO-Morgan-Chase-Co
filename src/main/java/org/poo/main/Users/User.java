@@ -2,6 +2,7 @@ package org.poo.main.Users;
 
 import org.poo.fileio.UserInput;
 import org.poo.main.Accounts.Account;
+import org.poo.main.Accounts.NullAccount;
 import org.poo.main.Date;
 import org.poo.main.Transactions.Transaction;
 
@@ -26,6 +27,11 @@ public class User {
         transactions = new ArrayList<>();
         birthDate = new Date(userInput.getBirthDate());
         occupation = userInput.getOccupation();
+    }
+
+    public User() { // empty constructor for NullUser
+        accounts = new ArrayList<>();
+        transactions = new ArrayList<>();
     }
 
     /**
@@ -66,7 +72,7 @@ public class User {
                 return account;
             }
         }
-        return null;
+        return new NullAccount();
     }
 
     /**
@@ -130,6 +136,10 @@ public class User {
 
     public Date getBirthDate() {
         return birthDate;
+    }
+
+    public int getAge() {
+        return birthDate.getAge();
     }
 }
 

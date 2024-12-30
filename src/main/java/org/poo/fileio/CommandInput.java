@@ -35,6 +35,17 @@ public final class CommandInput {
     private List<String> accounts;
     private List<Double> amountForUsers;
 
+    // constructor for split payment
+    public CommandInput(final String currency, final double amount,
+                        final List<String> accounts, final List<Double> amountForUsers,
+                        final String splitPaymentType) {
+        this.currency = currency;
+        this.amount = amount;
+        this.accounts = accounts;
+        this.amountForUsers = amountForUsers;
+        this.splitPaymentType = splitPaymentType;
+    }
+
     public String getCommand() {
         return command;
     }

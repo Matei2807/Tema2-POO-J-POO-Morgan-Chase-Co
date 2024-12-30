@@ -24,4 +24,8 @@ public class Date {
     public int getYear() {
         return year;
     }
+
+    public int getAge() {
+        return 2024 - year; // TODO: Ceck if this is correct
+    }
 }

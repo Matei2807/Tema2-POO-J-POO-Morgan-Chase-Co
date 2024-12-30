@@ -1,20 +1,23 @@
 package org.poo.main.Accounts;
 
 import org.poo.fileio.CommandInput;
+import org.poo.main.Users.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public final class BusinessAccount extends Account {
-    private Account owner;
-    private List<Account> managers;
-    private List<Account> employees;
+    private String owner; // Email of the owner
+    private List<String> managers;
+    private List<String> employees;
+    private double spendingLimit;
+    private double depositLimit;
 
-    public BusinessAccount(final CommandInput command) {
-        super(command);
+    public BusinessAccount(final CommandInput command, User user) {
+        super(command, user);
         managers = new ArrayList<>();
         employees = new ArrayList<>();
-        owner = null;
+        owner = user.getEmail();
     }
 
     @Override
@@ -22,27 +25,43 @@ public final class BusinessAccount extends Account {
         // No interest for business accounts
     }
 
-    public void setOwner(Account owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 
-    public void addManager(Account manager) {
+    public void addManager(String manager) {
         managers.add(manager);
     }
 
-    public void addEmployee(Account employee) {
+    public void addEmployee(String employee) {
         employees.add(employee);
     }
 
-    public Account getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public List<Account> getManagers() {
+    public List<String> getManagers() {
         return managers;
     }
 
-    public List<Account> getEmployees() {
+    public List<String> getEmployees() {
         return employees;
+    }
+
+    public double getSpendingLimit() {
+        return spendingLimit;
+    }
+
+    public void setSpendingLimit(double spendingLimit) {
+        this.spendingLimit = spendingLimit;
+    }
+
+    public double getDepositLimit() {
+        return depositLimit;
+    }
+
+    public void setDepositLimit(double depositLimit) {
+        this.depositLimit = depositLimit;
     }
 }

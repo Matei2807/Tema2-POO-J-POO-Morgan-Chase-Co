@@ -21,9 +21,9 @@ public abstract class Account {
     protected double minBalance;
     protected int minBalanceTimestamp;
     protected Map<Commerciant, TransactionInfoForCashback> commerciants; // // commerciants that the user has interacted with
-    protected String type; // savings, current, business(new)
+    protected String type; // savings, classic, business(new)
     protected String plan; // standard, student, silver, gold // TODO : check for commision using this
-    protected Map<String, Double> cashbackMap; // cashback for future transactions // TODO : use this for cashback
+    protected Map<String, Double> cashbackMap; // cashback for future transactions // TODO : remove this
     protected int paymentsOver300RON; // for upgrading the plan
 
     private boolean isNull = false;
@@ -88,6 +88,10 @@ public abstract class Account {
         Card card = new Card(oneTime);
         cards.add(card);
         return card;
+    }
+
+    public void addCard(final Card card) {
+        cards.add(card);
     }
 
     /**
@@ -189,9 +193,9 @@ public abstract class Account {
         }
         commerciants.get(commerciant).addTransaction(amount);
         // update cashback map
-        cashbackMap = CashBackHelper.getCashback(commerciants.get(commerciant), commerciant, this);
+        //cashbackMap = CashBackHelper.getCashback(commerciants.get(commerciant), commerciant, this); // TODO: remove this
 
-        // check if the plan should be upgraded(from silver to gold)
+        // check if the plan should be upgraded(from silver to gold) for free
         if (plan.equals("silver")) {
             paymentsOver300RON += amount >= 300 ? 1 : 0;
             plan = paymentsOver300RON >= 5 ? "gold" : "silver";
@@ -232,7 +236,19 @@ public abstract class Account {
         return plan;
     }
 
+    public void setPlan(String plan) {
+        this.plan = plan;
+    }
+
     public Map<String, Double> getCashbackMap() {
         return cashbackMap;
+    }
+
+    public double getInterestRate() {
+        return 0;
+    }
+
+    public TransactionInfoForCashback getTransactionInfoForCashback(Commerciant commerciant) {
+        return commerciants.get(commerciant);
     }
 }

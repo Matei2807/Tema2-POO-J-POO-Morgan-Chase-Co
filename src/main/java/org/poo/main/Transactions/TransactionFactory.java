@@ -42,6 +42,18 @@ public final class TransactionFactory {
                 return new DeleteAccountError(command);
             case "changeInterestRate":
                 return new ChangeInterestTransaction(command);
+            case "upgradePlan":
+                return new UpgradePlanTransaction(command);
+            case "withdrawSavingsAgeError":
+                return new WithdrawSavingsAgeErrorTransaction(command);
+            case "cashWithdrawal":
+                return new CashWithdrawalTransaction(command);
+            case "cardDestroyed":
+                return new CardDestroyedTransaction(command);
+            case "addInterest":
+                return new AddInterestTransaction(command);
+            case "noCurrentAccountError":
+                return new NoCurrentAccountErrorTransaction(command);
             default:
                 return null;
         }

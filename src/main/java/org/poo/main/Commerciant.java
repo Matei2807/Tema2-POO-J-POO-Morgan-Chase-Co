@@ -1,16 +1,19 @@
 package org.poo.main;
 
 import org.poo.fileio.CommerciantInput;
+import org.poo.main.Cashback.CashbackStrategy;
+import org.poo.main.Cashback.NrOfTransactionsStrategy;
+import org.poo.main.Cashback.SpendingThresholdStrategy;
 
 public final class Commerciant {
     private final String name;
     private int id;
     private String account;
     private String type;
-    private String cashbackStrategy; // nrOfTransactions / spendingThreshold(in RON)
     private double totalSales;
+    private CashbackStrategy cashbackStrategy;
 
-    public Commerciant(final String name) { // TODO: Will probably need to remove this constructor
+    public Commerciant(final String name) { // simple constructor for usage in spending report
         this.name = name;
         this.totalSales = 0;
     }
@@ -20,7 +23,7 @@ public final class Commerciant {
         id = commerciantInput.getId();
         account = commerciantInput.getAccount();
         type = commerciantInput.getType();
-        cashbackStrategy = commerciantInput.getCashbackStrategy();
+        cashbackStrategy = commerciantInput.getCashbackStrategy().equals("nrOfTransactions") ? new NrOfTransactionsStrategy() : new SpendingThresholdStrategy();
         totalSales = 0;
     }
 
@@ -52,7 +55,7 @@ public final class Commerciant {
         return type;
     }
 
-    public String getCashbackStrategy() {
+    public CashbackStrategy getCashbackStrategy() {
         return cashbackStrategy;
     }
 }

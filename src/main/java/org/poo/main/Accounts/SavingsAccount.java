@@ -19,6 +19,11 @@ public final class SavingsAccount extends Account {
         balance += balance * interestRate;
     }
 
+    @Override
+    public double getInterestRate() {
+        return interestRate;
+    }
+
     public void setInterestRate(final double interestRate) {
         this.interestRate = interestRate;
     }

@@ -6,7 +6,7 @@ import org.poo.main.Commerciant;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CashBackHelper {
+public class CashBackHelper { // TODO: delete this class
     /**
      * Get the cashback for future transactions
      * @param info the transaction info
@@ -23,7 +23,8 @@ public class CashBackHelper {
             "All" - 0.XX - for spendingThreshold
         */
         Map<String, Double> cashbackMap = new HashMap<>();
-        String cashbackStrategy = commerciant.getCashbackStrategy();
+        //String cashbackStrategy = commerciant.getCashbackStrategy();
+        String cashbackStrategy = commerciant.getCashbackStrategy().getClass().getSimpleName();
 
         if (cashbackStrategy.equals("nrOfTransactions")) {
             int nrOfTransactions = info.getNrOfTransactions();
