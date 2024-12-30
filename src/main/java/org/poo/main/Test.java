@@ -24,6 +24,7 @@ public final class Test {
     public static void main(final String[] args) throws IOException {
         File directory = new File(CheckerConstants.TESTS_PATH);
         File[] inputDir = directory.listFiles();
+        Bank bank = Bank.getInstance();
 
         if (inputDir != null) {
             Arrays.sort(inputDir);
@@ -32,7 +33,7 @@ public final class Test {
             String fileName = scanner.next();
             for (File file : inputDir) {
                 if (file.getName().equalsIgnoreCase(fileName)) {
-                    Main.action(file.getName(), CheckerConstants.OUT_FILE);
+                    Main.action(file.getName(), CheckerConstants.OUT_FILE, bank);
                     break;
                 }
             }

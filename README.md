@@ -1,34 +1,49 @@
-# Project Assignment POO  - J. POO Morgan - Phase One
+@Author:
+- `Hutu Matei-Alexandru`
+- `321CA`
 
-![](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2dibmZueTVmbGNoY2kxcDlkdHpsd3hvNDA5ZTRleHcwMzRxM2x0OSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lJEGgG5ajs4zC/giphy.gif)
+## Proiect Etapa 2 - J. POO Morgan Chase & Co.
 
-#### Assignment Link: [https://ocw.cs.pub.ro/courses/poo-ca-cd/teme/2024/proiect-etapa2](https://ocw.cs.pub.ro/courses/poo-ca-cd/teme/2024/proiect-etapa2)
+# Implementarea bancii #
 
-## Skel Structure
+## Clasele implementate ##
+1. `Bank` - clasa care reprezinta banca in sine, cu toate operatiile pe care le
+   poate efectua
+2. `User` - clasa care reprezinta un utilizator al bancii
+3. `Account` - clasa care reprezinta un cont bancar
+    + Tipurile diferite de conturi ce pot fi create, care extind clasa Account
+      (cont curent, cont economii)
+4. `Transaction` - clasa care reprezinta o tranzactie
+    + Tipurile diferite de tranzactii ce pot fi salvate, care extind clasa
+      Transaction
+5. `Card` - clasa care reprezinta un card bancar
+6. `Commerciant` - clasa care reprezinta un comerciant
+7. `ExchangeRate` - clasa care reprezinta un curs de schimb valutar
 
-* src/
-    * checker/ - checker files
-    * fileio/ - contains classes used to read data from the json files
-    * main/
-        * Main - the Main class runs the checker on your implementation. Add the entry point to your implementation in it. Run Main to test your implementation from the IDE or from command line.
-        * Test - run the main method from Test class with the name of the input file from the command line and the result will be written
-          to the out.txt file. Thus, you can compare this result with ref.
-* input/ - contains the tests in JSON format
-* ref/ - contains all reference output for the tests in JSON format
+## Implementare ##
 
-## Tests
+- Implementarea incepe din Main unde se creeaza o noua instanta a clasei Bank,
+  care va efectua toate operatiile cerute
+- Se citesc utilizatorii si cursurile de schimb valutar din fisierul de input
+  (se salveaza si fiecare schimb valutar pe invers pentru a se putea face
+  conversia in ambele sensuri)
+- Se ruleaza operatiile cerute in functie de comanda citita
+- In afara de functiile cerute in cardul bancii, am mai adaugat functii pentru
+  gasirea unui utilizator sau cont in functie de IBAN/email/numar de card. Pentru
+  o utilizare mai facila a acestor functii in clasa bank, am folosit si `Null
+Object Pattern`(1) pentru a returna un utilizator/cont inexistent in loc de a
+  returna null(si a verifica apoi daca obiectul returnat este null)
+- De asemenea, a mai fost nevoie de implementarea unei functii pentru a gasi
+  cursul valutar intre oricare 2 valute, folosind un algoritm recursiv
+- Pentru a putea salva de fiecare data tranzactiile efectuate, am folosit un
+  `Factory Pattern`(2) pentru a crea obiecte diferite care extind clasa Transaction,
+  in functie de tipul tranzactiei efectuate
+- Fiecare tranzactie este salvata intr-un vector de tranzactii in user-ul care
+  a efectuat-o pentru o mai buna gestionare a acestora
+- De asemenea, in utilizator sa salveaza si conturile sale, iar in fiecare
+  cont, cardurile atasate, cat si toti comerciantii care au efectuat tranzactii
+- cu acel cont
 
-Tests Basic 1 - 10: Infrastructure \
-Tests Functional 11 - 17: Advanced \
-Tests Flow 18 - 20: Large Input
 
-1. test01_user_updates - 2p
-2. test02_upgrade_plan - 2p
-3. test04_commisions - 2p
-4. test05_savings_update - 2p
-5. test06_cashback - 2p
-6. test07_simple_split_payment - 2p
-7. test08_advanced_split_payment - 2p
-8. test09_business_account_simple - 2p
-9. test10_business_account_limits - 2p
-
+- `Added Strategy pattern for the cashback system`(3)
+- `Added Singleton pattern for the bank`(4)

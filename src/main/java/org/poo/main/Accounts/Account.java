@@ -192,6 +192,7 @@ public abstract class Account {
             commerciants.put(commerciant, new TransactionInfoForCashback());
         }
         commerciants.get(commerciant).addTransaction(amount);
+
         // update cashback map
         //cashbackMap = CashBackHelper.getCashback(commerciants.get(commerciant), commerciant, this); // TODO: remove this
 

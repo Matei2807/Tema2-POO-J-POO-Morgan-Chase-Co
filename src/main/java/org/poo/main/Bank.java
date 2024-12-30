@@ -23,7 +23,24 @@ public final class Bank {
     // adding a split payment queue(waiting for the other users to accept/reject the payment)
     private Queue<SplitPayment> splitPaymentQueue = new LinkedList<>();
 
-    public Bank(final ObjectInput inputData) {
+    private static Bank instance = null; // Singleton Pattern
+
+    public static Bank getInstance() {
+        if (instance == null) {
+            instance = new Bank();
+        }
+        return instance;
+    }
+
+    private Bank() {}
+
+    public void updateData(final ObjectInput inputData) {
+        users.clear();
+        exchangeRates.clear();
+        aliases.clear();
+        commerciants.clear();
+        splitPaymentQueue.clear();
+
         for (UserInput userInput : inputData.getUsers()) {
             users.add(new User(userInput));
         }

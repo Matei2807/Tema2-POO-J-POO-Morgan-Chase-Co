@@ -36,6 +36,7 @@ public final class Main {
     public static void main(final String[] args) throws IOException {
         File directory = new File(CheckerConstants.TESTS_PATH);
         Path path = Paths.get(CheckerConstants.RESULT_PATH);
+        Bank bank = Bank.getInstance();
 
         if (Files.exists(path)) {
             File resultFile = new File(String.valueOf(path));
@@ -55,7 +56,7 @@ public final class Main {
             File out = new File(filepath);
             boolean isCreated = out.createNewFile();
             if (isCreated) {
-                action(file.getName(), filepath);
+                action(file.getName(), filepath, bank);
             }
         }
 
@@ -68,7 +69,7 @@ public final class Main {
      * @throws IOException in case of exceptions to reading / writing
      */
     public static void action(final String filePath1,
-                              final String filePath2) throws IOException {
+                              final String filePath2, Bank bank) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(CheckerConstants.TESTS_PATH + filePath1);
         ObjectInput inputData = objectMapper.readValue(file, ObjectInput.class);
@@ -76,7 +77,8 @@ public final class Main {
         ArrayNode output = objectMapper.createArrayNode();
 
         Utils.resetRandom();
-        Bank bank = new Bank(inputData);
+        //Bank bank = new Bank(inputData);
+        bank.updateData(inputData);
         bank.runCommands(inputData.getCommands(), output);
 
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
