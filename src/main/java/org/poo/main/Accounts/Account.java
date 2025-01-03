@@ -2,7 +2,6 @@ package org.poo.main.Accounts;
 
 import org.poo.fileio.CommandInput;
 import org.poo.main.Card;
-import org.poo.main.Cashback.CashBackHelper;
 import org.poo.main.Commerciant;
 import org.poo.main.Cashback.TransactionInfoForCashback;
 import org.poo.main.Users.User;
@@ -20,11 +19,8 @@ public abstract class Account {
     protected List<Card> cards;
     protected double minBalance;
     protected int minBalanceTimestamp;
-    protected Map<Commerciant, TransactionInfoForCashback> commerciants; // // commerciants that the user has interacted with
-    protected String type; // savings, classic, business(new)
-    protected String plan; // standard, student, silver, gold // TODO : check for commision using this
-    protected Map<String, Double> cashbackMap; // cashback for future transactions // TODO : remove this
-    protected int paymentsOver300RON; // for upgrading the plan
+    protected Map<Commerciant, TransactionInfoForCashback> commerciants; // // commerciants that the user has interacted with // TODO : remove this
+    protected String type; // savings, classic, business
 
     private boolean isNull = false;
 
@@ -35,8 +31,6 @@ public abstract class Account {
         cards = new ArrayList<>();
         commerciants = new HashMap<>();
         type = command.getAccountType();
-        plan = user.getOccupation().equals("student") ? "student" : "standard";
-        cashbackMap = CashBackHelper.getEmptyCashbackMap();
     }
 
     public Account() { // Constructor for NullAccount
@@ -47,8 +41,6 @@ public abstract class Account {
         commerciants = new HashMap<>();
         type = "";
         isNull = true;
-        plan = "";
-        cashbackMap = new HashMap<>();
     }
 
     /**
@@ -184,23 +176,21 @@ public abstract class Account {
     }
 
     /**
-     * Add a commerciant to the account
-     * @param commerciant the commerciant to add
+     * Add a transaction to the commerciant
+     * @param commerciant the commerciant to add the transaction to
+     * @param amount the amount of the transaction
+     * @return the cashback percentage
      */
-    public void addCommerciant(final Commerciant commerciant, final double amount) {
+    public double addCommerciantTransaction(final Commerciant commerciant, final double amount, final User user) {
         if (!commerciants.containsKey(commerciant)) {
             commerciants.put(commerciant, new TransactionInfoForCashback());
         }
         commerciants.get(commerciant).addTransaction(amount);
 
-        // update cashback map
-        //cashbackMap = CashBackHelper.getCashback(commerciants.get(commerciant), commerciant, this); // TODO: remove this
+        user.checkPlanUpgrade(amount);
 
-        // check if the plan should be upgraded(from silver to gold) for free
-        if (plan.equals("silver")) {
-            paymentsOver300RON += amount >= 300 ? 1 : 0;
-            plan = paymentsOver300RON >= 5 ? "gold" : "silver";
-        }
+        // return cashback percentage
+        return commerciant.getCashbackStrategy().getCashback(getTransactionInfoForCashback(commerciant), commerciant.getType(), user, amount);
     }
 
     /**
@@ -231,18 +221,6 @@ public abstract class Account {
             }
         }
         return null;
-    }
-
-    public String getPlan() {
-        return plan;
-    }
-
-    public void setPlan(String plan) {
-        this.plan = plan;
-    }
-
-    public Map<String, Double> getCashbackMap() {
-        return cashbackMap;
     }
 
     public double getInterestRate() {

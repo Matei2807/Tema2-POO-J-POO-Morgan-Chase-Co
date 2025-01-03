@@ -3,6 +3,8 @@ package org.poo.main.Transactions;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.fileio.CommandInput;
+import org.poo.main.Accounts.Account;
+import org.poo.main.Bank;
 
 import java.util.List;
 
@@ -11,7 +13,9 @@ public final class SplitTransaction extends Transaction {
     private String currency;
     private String transferType;
     private List<String> involvedAccounts;
+    private List<Double> amountsForAccounts;
     private String error;
+    private String type;
 
     public SplitTransaction(final CommandInput command, final String transferType) {
         super(command.getTimestamp(),
@@ -22,6 +26,8 @@ public final class SplitTransaction extends Transaction {
         this.currency = command.getCurrency();
         this.transferType = transferType;
         this.involvedAccounts = command.getAccounts();
+        this.amountsForAccounts = command.getAmountForUsers();
+        this.type = command.getSplitPaymentType();
         if (transferType.equals("error")) {
             this.error = "Account " + command.getAccount()
                          + " has insufficient funds for a split payment.";
@@ -34,11 +40,21 @@ public final class SplitTransaction extends Transaction {
         transactionObject.put("timestamp", getTimestamp());
         transactionObject.put("description", getDescription());
         transactionObject.put("currency", currency);
-        transactionObject.put("amount", amount);
         ArrayNode involvedAccountsArray = transactionObject.putArray("involvedAccounts");
         for (String account : involvedAccounts) {
             involvedAccountsArray.add(account);
         }
+
+        if (type.equals("equal")) {
+            transactionObject.put("amount", Bank.roundToTwoDecimals(amount));
+        } else {
+            ArrayNode amountsForAccountsArray = transactionObject.putArray("amountForUsers");
+            for (Double amount : amountsForAccounts) {
+                amountsForAccountsArray.add(amount);
+            }
+        }
+
+        transactionObject.put("splitPaymentType", type);
         if (transferType.equals("error")) {
             transactionObject.put("error", error);
         }

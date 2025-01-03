@@ -1,6 +1,7 @@
 package org.poo.main;
 
 import org.poo.fileio.CommandInput;
+import org.poo.main.Users.User;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ public class SplitPayment {
     double amount;
     String splitPaymentType; // equal/custom
     Set<String> acceptedAccounts;
+    int timestamp;
 
     public SplitPayment(CommandInput commandInput) {
         this.accounts = commandInput.getAccounts();
@@ -21,11 +23,17 @@ public class SplitPayment {
         this.currency = commandInput.getCurrency();
         this.amount = commandInput.getAmount();
         this.splitPaymentType = commandInput.getSplitPaymentType();
+        this.timestamp = commandInput.getTimestamp();
         this.acceptedAccounts = new HashSet<>();
     }
 
-    public boolean containsEmail(String email) {
-        return accounts.contains(email);
+    public boolean hasUser(User user) {
+        for (String account : accounts) {
+            if (user.hasAccount(account)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void acceptAccount(String email) {
@@ -54,5 +62,9 @@ public class SplitPayment {
 
     public String getSplitPaymentType() {
         return splitPaymentType;
+    }
+
+    public int getTimestamp() {
+        return timestamp;
     }
 }
