@@ -3,6 +3,7 @@ package org.poo.main.Transactions;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.fileio.CommandInput;
+import org.poo.main.Bank;
 
 public final class CommerciantTransaction extends Transaction {
     private double amount;
@@ -22,7 +23,7 @@ public final class CommerciantTransaction extends Transaction {
         ObjectNode transactionObject = transactionsArray.addObject();
         transactionObject.put("timestamp", getTimestamp());
         transactionObject.put("description", getDescription());
-        transactionObject.put("amount", amount);
+        transactionObject.put("amount", Bank.roundToTwoDecimals(amount));
         transactionObject.put("commerciant", commerciant);
     }
 

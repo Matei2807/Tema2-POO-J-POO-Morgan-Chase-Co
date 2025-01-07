@@ -223,6 +223,8 @@ public final class Bank {
 
         Transaction transaction = TransactionFactory.createTransaction(command, "cashWithdrawal", "");
         user.addTransaction(transaction);
+
+        System.out.println("Cash withdrawal: " + amountInRon + " RON from account: " + account.getAccountNumber() + " email: " + user.getEmail() + " withdraw in currency: " + withdrawAmountInCurrency + " " + account.getCurrency());
     }
 
     private void changeDepositLimit(CommandInput command, ArrayNode output) {
@@ -897,6 +899,10 @@ public final class Bank {
         String commerciantName = command.getCommerciant();
         String email = command.getEmail();
 
+        if (amount == 0) {
+            return;
+        }
+
         User user = getUserByEmail(email);
         Account account = getAccountByCardNumber(cardNumber);
         if (account.isNull()) {
@@ -931,7 +937,7 @@ public final class Bank {
         double convertedAmountPreCommission = convertedAmount;
 
         // add the commission // TODO: check if it is correct
-        double exchangeRateRON = getExchangeRate(senderCurrency, "RON");
+        double exchangeRateRON = getExchangeRate(currency, "RON");
         double spentAmountInRON = amount * exchangeRateRON;
         String planType = user.getPlan();
         switch (planType) {
@@ -1006,8 +1012,10 @@ public final class Bank {
         commerciantToAdd.addSale(amount); // TODO: check if it is amount or convertedAmount
 
         spentAmountInRON = amount * exchangeRateRON;
+        System.out.println("Spent amount in RON: " + spentAmountInRON);
         double cashback = account.addCommerciantTransaction(commerciantToAdd , spentAmountInRON, user) * convertedAmount;
         account.addFunds(cashback);
+        System.out.println("Found cashback: " + cashback + " for: " + email + " and " + commerciantName + " time: " + timestamp + " percent: " + cashback / convertedAmount * 100);
 
         if (card.isOneTime()) {
             // delete the card
@@ -1040,6 +1048,10 @@ public final class Bank {
         double amount = command.getAmount();
         String receiverIBAN = command.getReceiver();
         int timestamp = command.getTimestamp();
+
+        if (amount == 0) {
+            return;
+        }
 
         User senderUser = getUserByIBAN(senderIBAN);
         Account sender = getAccountByIBAN(senderIBAN);
@@ -1128,6 +1140,7 @@ public final class Bank {
             // add the sale to the commerciant in the account and add the cashback
             commerciant.addSale(convertedAmount);
             double cashback = sender.addCommerciantTransaction(commerciant, spentAmountInRON, senderUser) * convertedAmount;
+            System.out.println("Found cashback: " + cashback + " for: " + senderUser.getEmail() + " and " + commerciant.getName() + " time: " + timestamp + " on sendMoney");
             sender.addFunds(cashback); // TODO: check this cashback
         }
 
@@ -1769,6 +1782,19 @@ public final class Bank {
         }
 
         bd = bd.setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    public static double roundToNDecimals(double value, int n) {
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.stripTrailingZeros();
+        int scale = bd.scale();
+
+        if (scale <= n) {
+            return value;
+        }
+
+        bd = bd.setScale(n, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
 }
