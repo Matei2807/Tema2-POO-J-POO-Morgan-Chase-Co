@@ -28,9 +28,11 @@ public final class SplitTransaction extends Transaction {
         this.involvedAccounts = command.getAccounts();
         this.amountsForAccounts = command.getAmountForUsers();
         this.type = command.getSplitPaymentType();
-        if (transferType.equals("error")) {
+        if (transferType.equals("errorNoFunds")) {
             this.error = "Account " + command.getAccount()
                          + " has insufficient funds for a split payment.";
+        } else if (transferType.equals("errorRejected")) {
+            this.error = "One user rejected the payment.";
         }
     }
 
@@ -46,7 +48,7 @@ public final class SplitTransaction extends Transaction {
         }
 
         if (type.equals("equal")) {
-            transactionObject.put("amount", Bank.roundToTwoDecimals(amount));
+            transactionObject.put("amount", amount);
         } else {
             ArrayNode amountsForAccountsArray = transactionObject.putArray("amountForUsers");
             for (Double amount : amountsForAccounts) {
@@ -55,7 +57,7 @@ public final class SplitTransaction extends Transaction {
         }
 
         transactionObject.put("splitPaymentType", type);
-        if (transferType.equals("error")) {
+        if (transferType.equals("errorNoFunds") || transferType.equals("errorRejected")) {
             transactionObject.put("error", error);
         }
     }

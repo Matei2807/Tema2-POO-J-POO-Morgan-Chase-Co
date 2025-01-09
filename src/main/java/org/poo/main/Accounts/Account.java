@@ -4,6 +4,8 @@ import org.poo.fileio.CommandInput;
 import org.poo.main.Card;
 import org.poo.main.Commerciant;
 import org.poo.main.Cashback.TransactionInfoForCashback;
+import org.poo.main.Transactions.Transaction;
+import org.poo.main.Transactions.TransactionFactory;
 import org.poo.main.Users.User;
 import org.poo.utils.Utils;
 
@@ -181,13 +183,17 @@ public abstract class Account {
      * @param amount the amount of the transaction
      * @return the cashback percentage
      */
-    public double addCommerciantTransaction(final Commerciant commerciant, final double amount, final User user) {
+    public double addCommerciantTransaction(final Commerciant commerciant, final double amount, final User user, final CommandInput command) {
         if (!commerciants.containsKey(commerciant)) {
             commerciants.put(commerciant, new TransactionInfoForCashback());
         }
         commerciants.get(commerciant).addTransaction(amount);
 
-        user.checkPlanUpgrade(amount);
+        if (user.checkPlanUpgrade(amount)) {
+            command.setNewPlanType("gold");
+            Transaction transaction = TransactionFactory.createTransaction(command, "upgradePlan", "");
+            user.addTransaction(transaction);
+        }
 
         // return cashback percentage
         return commerciant.getCashbackStrategy().getCashback(getTransactionInfoForCashback(commerciant), commerciant.getType(), user, amount);
@@ -229,5 +235,9 @@ public abstract class Account {
 
     public TransactionInfoForCashback getTransactionInfoForCashback(Commerciant commerciant) {
         return commerciants.get(commerciant);
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

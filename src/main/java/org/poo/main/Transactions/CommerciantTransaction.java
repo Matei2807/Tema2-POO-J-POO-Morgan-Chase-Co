@@ -23,7 +23,7 @@ public final class CommerciantTransaction extends Transaction {
         ObjectNode transactionObject = transactionsArray.addObject();
         transactionObject.put("timestamp", getTimestamp());
         transactionObject.put("description", getDescription());
-        transactionObject.put("amount", Bank.roundToTwoDecimals(amount));
+        transactionObject.put("amount", amount);
         transactionObject.put("commerciant", commerciant);
     }
 

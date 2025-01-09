@@ -3,6 +3,7 @@ package org.poo.main.Transactions;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.fileio.CommandInput;
+import org.poo.main.Bank;
 
 public class AddInterestTransaction extends Transaction{
     private double amount;
@@ -20,7 +21,7 @@ public class AddInterestTransaction extends Transaction{
         ObjectNode transaction = transactionsArray.addObject();
         transaction.put("timestamp", getTimestamp());
         transaction.put("description", getDescription());
-        transaction.put("amount", amount);
+        transaction.put("amount",amount);
         transaction.put("currency", currency);
     }
 

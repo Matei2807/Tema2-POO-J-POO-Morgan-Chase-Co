@@ -36,6 +36,15 @@ public class SplitPayment {
         return false;
     }
 
+    public boolean hasAccepted(User user) {
+        for (String acceptedEmail : acceptedAccounts) {
+            if (user.getEmail().equals(acceptedEmail)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void acceptAccount(String email) {
         acceptedAccounts.add(email);
     }

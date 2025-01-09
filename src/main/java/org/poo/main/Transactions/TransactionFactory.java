@@ -54,6 +54,10 @@ public final class TransactionFactory {
                 return new AddInterestTransaction(command);
             case "noCurrentAccountError":
                 return new NoCurrentAccountErrorTransaction(command);
+            case "upgradePlanError":
+                return new UpgradePlanErrorTransaction(command, transferType);
+            case "withdrawSavings":
+                return new WithdrawSavingsTransaction(command);
             default:
                 return null;
         }

@@ -164,11 +164,13 @@ public class User {
         return plan;
     }
 
-    public void checkPlanUpgrade(double amount) {
+    public boolean checkPlanUpgrade(double amount) {
         if (plan.equals("silver")) {
             paymentsOver300RON += (amount >= 300) ? 1 : 0;
             plan = paymentsOver300RON >= 5 ? "gold" : "silver";
+            return plan.equals("gold");
         }
+        return false;
     }
 
     public Map<String, Double> getCashbackMap() {

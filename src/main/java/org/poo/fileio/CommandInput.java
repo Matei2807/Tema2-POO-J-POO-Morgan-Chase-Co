@@ -174,4 +174,12 @@ public final class CommandInput {
     public String getSplitPaymentType() {
         return splitPaymentType;
     }
+
+    public void setAccounts(List<String> accounts) {
+        this.accounts = accounts;
+    }
+
+    public void setNewPlanType(String newPlanType) {
+        this.newPlanType = newPlanType;
+    }
 }

@@ -72,6 +72,10 @@ public final class BusinessAccount extends Account {
         businessTrasactions.add(transaction);
     }
 
+    public boolean hasUser(String email) {
+        return owner.equals(email) || managers.contains(email) || employees.contains(email);
+    }
+
     public double getUserDeposit(String email, int startTimestamp, int endTimestamp) {
         double deposit = 0;
         for (BusinessAccountTransaction transaction : businessTrasactions) {
@@ -98,10 +102,13 @@ public final class BusinessAccount extends Account {
         List<String> paidCommerciants = new ArrayList<>();
         for (BusinessAccountTransaction transaction : businessTrasactions) {
             if (transaction.getSpentAmount() > 0 && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp
-                && !paidCommerciants.contains(transaction.getReceiverCommerciant()) && !transaction.getReceiverCommerciant().isEmpty()) {
+                && !paidCommerciants.contains(transaction.getReceiverCommerciant()) && !transaction.getReceiverCommerciant().isEmpty()
+                && !transaction.getSenderEmail().equals(owner)) {
                 paidCommerciants.add(transaction.getReceiverCommerciant());
             }
         }
+        //sort the list
+        paidCommerciants.sort(String::compareTo);
         return paidCommerciants;
     }
 
@@ -109,7 +116,8 @@ public final class BusinessAccount extends Account {
         double spentAmount = 0;
         for (BusinessAccountTransaction transaction : businessTrasactions) {
             if (transaction.getReceiverCommerciant().equals(commerciant) && transaction.getSpentAmount() > 0
-                    && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp) {
+                    && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp
+                    && !transaction.getSenderEmail().equals(owner)) {
                 spentAmount += transaction.getSpentAmount();
             }
         }
