@@ -1,9 +1,8 @@
 package org.poo.main;
 
 import org.poo.fileio.CommandInput;
-import org.poo.main.Users.User;
+import org.poo.main.users.User;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +14,7 @@ public class SplitPayment {
     double amount;
     String splitPaymentType; // equal/custom
     Set<String> acceptedAccounts;
+    Set<String> rejectedAccounts;
     int timestamp;
 
     public SplitPayment(CommandInput commandInput) {
@@ -25,6 +25,7 @@ public class SplitPayment {
         this.splitPaymentType = commandInput.getSplitPaymentType();
         this.timestamp = commandInput.getTimestamp();
         this.acceptedAccounts = new HashSet<>();
+        this.rejectedAccounts = new HashSet<>();
     }
 
     public boolean hasUser(User user) {
@@ -45,12 +46,29 @@ public class SplitPayment {
         return false;
     }
 
+    public boolean hasRejected(User user) {
+        for (String rejectedEmail : rejectedAccounts) {
+            if (user.getEmail().equals(rejectedEmail)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void acceptAccount(String email) {
         acceptedAccounts.add(email);
     }
 
+    public void rejectAccount(String email) {
+        rejectedAccounts.add(email);
+    }
+
     public boolean isAccepted() {
         return acceptedAccounts.size() == accounts.size();
+    }
+
+    public boolean isRejected() {
+        return rejectedAccounts.size() + acceptedAccounts.size() == accounts.size() && !rejectedAccounts.isEmpty();
     }
 
     public List<String> getAccounts() {

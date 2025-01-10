@@ -1,9 +1,9 @@
 package org.poo.main;
 
 import org.poo.fileio.CommerciantInput;
-import org.poo.main.Cashback.CashbackStrategy;
-import org.poo.main.Cashback.NrOfTransactionsStrategy;
-import org.poo.main.Cashback.SpendingThresholdStrategy;
+import org.poo.main.cashback.CashbackStrategy;
+import org.poo.main.cashback.NrOfTransactionsStrategy;
+import org.poo.main.cashback.SpendingThresholdStrategy;
 
 public final class Commerciant {
     private final String name;
