@@ -6,7 +6,7 @@ import org.poo.main.users.User;
 public final class SavingsAccount extends Account {
     private double interestRate;
 
-    public SavingsAccount(final CommandInput command, User user) {
+    public SavingsAccount(final CommandInput command, final User user) {
         super(command, user);
         this.interestRate = command.getInterestRate();
     }

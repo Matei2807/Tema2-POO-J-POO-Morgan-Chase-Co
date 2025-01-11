@@ -175,11 +175,11 @@ public final class CommandInput {
         return splitPaymentType;
     }
 
-    public void setAccounts(List<String> accounts) {
+    public void setAccounts(final List<String> accounts) {
         this.accounts = accounts;
     }
 
-    public void setNewPlanType(String newPlanType) {
+    public void setNewPlanType(final String newPlanType) {
         this.newPlanType = newPlanType;
     }
 }

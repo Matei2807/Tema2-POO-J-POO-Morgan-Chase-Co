@@ -2,15 +2,31 @@ package org.poo.main;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.poo.fileio.*;
-import org.poo.main.accounts.*;
-import org.poo.main.transactions.*;
+import org.poo.fileio.CommandInput;
+import org.poo.fileio.ExchangeInput;
+import org.poo.fileio.ObjectInput;
+import org.poo.fileio.UserInput;
+import org.poo.fileio.CommerciantInput;
+import org.poo.main.accounts.CurrentAccount;
+import org.poo.main.accounts.SavingsAccount;
+import org.poo.main.accounts.BusinessAccount;
+import org.poo.main.accounts.NullAccount;
+import org.poo.main.accounts.Account;
+import org.poo.main.transactions.Transaction;
+import org.poo.main.transactions.TransactionFactory;
+import org.poo.main.transactions.BusinessAccountTransaction;
+import org.poo.main.transactions.CommerciantTransaction;
 import org.poo.main.users.NullUser;
 import org.poo.main.users.User;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
 
 public final class Bank {
     private List<User> users = new ArrayList<>();
@@ -226,7 +242,7 @@ public final class Bank {
         //check if the user is the owner of the account
         BusinessAccount businessAccount = (BusinessAccount) userAccount;
         if (!businessAccount.getOwner().equals(userEmail)) {
-            putSimpleOutput("description", "You must be owner in order to change spending limit.", command, output);
+            putSimpleOutput("description", "You must be owner in order to change deposit limit.", command, output);
             return;
         }
 
@@ -284,6 +300,8 @@ public final class Bank {
         if ((role.equals("manager") && businessAccount.getManagers().contains(associateEmail))
             || (role.equals("employee") && businessAccount.getEmployees().contains(associateEmail))) {
             putSimpleOutput("description", "Associate already added", command, output);
+            return;
+        } else if (businessAccount.hasUser(associateEmail)) {
             return;
         }
 
@@ -554,6 +572,8 @@ public final class Bank {
             BusinessAccount businessAccount = (BusinessAccount) account;
             if (businessAccount.getDepositLimit() < amount && businessAccount.getEmployees().contains(email)) {
                 // TODO: create the transaction??
+                return;
+            } else if (!businessAccount.hasUser(email)) {
                 return;
             }
             // adds special transaction for business account

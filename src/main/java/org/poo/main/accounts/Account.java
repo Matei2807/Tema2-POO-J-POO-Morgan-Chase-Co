@@ -21,7 +21,8 @@ public abstract class Account {
     protected List<Card> cards;
     protected double minBalance;
     protected int minBalanceTimestamp;
-    protected Map<Commerciant, TransactionInfoForCashback> commerciants; // // commerciants that the user has interacted with // TODO : remove this
+    protected Map<Commerciant, TransactionInfoForCashback> commerciants;
+    private TransactionInfoForCashback transactionInfoForSpendingThreshold;
     protected String type; // savings, classic, business
 
     private boolean isNull = false;
@@ -33,6 +34,8 @@ public abstract class Account {
         cards = new ArrayList<>();
         commerciants = new HashMap<>();
         type = command.getAccountType();
+        transactionInfoForSpendingThreshold = new TransactionInfoForCashback();
+
     }
 
     public Account() { // Constructor for NullAccount
@@ -43,6 +46,15 @@ public abstract class Account {
         commerciants = new HashMap<>();
         type = "";
         isNull = true;
+        transactionInfoForSpendingThreshold = new TransactionInfoForCashback();
+    }
+
+    /**
+     * Set the cuurency of the account
+     * @param currency
+     */
+    public void setCurrency(final String currency) {
+        this.currency = currency;
     }
 
     /**
@@ -82,10 +94,6 @@ public abstract class Account {
         Card card = new Card(oneTime);
         cards.add(card);
         return card;
-    }
-
-    public void addCard(final Card card) {
-        cards.add(card);
     }
 
     /**
@@ -183,20 +191,26 @@ public abstract class Account {
      * @param amount the amount of the transaction
      * @return the cashback percentage
      */
-    public double addCommerciantTransaction(final Commerciant commerciant, final double amount, final User user, final CommandInput command) {
+    public double addCommerciantTransaction(final Commerciant commerciant, final double amount,
+                                            final User user, final CommandInput command) {
         if (!commerciants.containsKey(commerciant)) {
             commerciants.put(commerciant, new TransactionInfoForCashback());
         }
         commerciants.get(commerciant).addTransaction(amount);
 
+        double cashback = commerciant.getCashbackStrategy().
+                          getCashback(getTransactionInfoForCashback(commerciant),
+                          commerciant.getType(), user, amount);
+
         if (user.checkPlanUpgrade(amount)) {
             command.setNewPlanType("gold");
-            Transaction transaction = TransactionFactory.createTransaction(command, "upgradePlan", "");
+            Transaction transaction = TransactionFactory.createTransaction(command,
+                                                             "upgradePlan", "");
             user.addTransaction(transaction);
         }
 
         // return cashback percentage
-        return commerciant.getCashbackStrategy().getCashback(getTransactionInfoForCashback(commerciant), commerciant.getType(), user, amount);
+        return cashback;
     }
 
     /**
@@ -229,15 +243,20 @@ public abstract class Account {
         return null;
     }
 
+    /**
+     * Get the interest rate of the account
+     * @return the interest rate
+     */
     public double getInterestRate() {
         return 0;
     }
 
-    public TransactionInfoForCashback getTransactionInfoForCashback(Commerciant commerciant) {
+    /**
+     * Get the transaction info for cashback
+     * @param commerciant the commerciant to get the transaction info for
+     * @return the transaction info for cashback
+     */
+    public TransactionInfoForCashback getTransactionInfoForCashback(final Commerciant commerciant) {
         return commerciants.get(commerciant);
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
     }
 }

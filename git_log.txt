@@ -1,0 +1,53 @@
+commit e548aefb6a305ff490e76ca99a1b5991dae64c38
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Sat Jan 11 01:24:20 2025 +0200
+
+    Done last test
+
+commit 64917ff055375ebea945c87f34e0c8ed12e00445
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Thu Jan 9 22:39:28 2025 +0200
+
+    Resolved most problems
+
+commit f27a9e530a300137852ee2a9700df2c070dabf64
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Tue Jan 7 12:17:05 2025 +0200
+
+    Fixed some error(without rounding done)
+
+commit 557ea25ffe0b07f7579219a7f9d90ec8e73f32aa
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Fri Jan 3 23:07:38 2025 +0200
+
+    Finished casback + added new reports
+
+commit fe9e2491cfa83040f6b27ae837a19f526902a0bd
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Mon Dec 30 15:38:22 2024 +0200
+
+    Added singleton pattern
+
+commit e55e79efa42d31a5be7f7955775aa206b1030762
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Mon Dec 30 15:07:44 2024 +0200
+
+    Added cashback - strategy pattern
+
+commit 40041aa181c1e5734813c0bd0ce790c76ec845b2
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Tue Dec 24 22:29:20 2024 +0200
+
+    Added some upgrades
+
+commit d39c94534a9986fe9c3b2cd6e41fcec553bfdab2
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Tue Dec 24 20:00:54 2024 +0200
+
+    Added first part
+
+commit b58d9e81d579512bab9e363784eccd2613679a69
+Author: Matei2807 <hutu.matei@gmail.com>
+Date:   Tue Dec 24 19:53:00 2024 +0200
+
+    Added skel

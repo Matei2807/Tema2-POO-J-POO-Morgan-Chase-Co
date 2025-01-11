@@ -4,7 +4,7 @@ import org.poo.fileio.CommandInput;
 import org.poo.main.users.User;
 
 public final class CurrentAccount extends Account {
-    public CurrentAccount(final CommandInput command, User user) {
+    public CurrentAccount(final CommandInput command, final User user) {
         super(command, user);
     }
 

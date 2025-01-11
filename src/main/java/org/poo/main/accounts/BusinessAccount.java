@@ -15,7 +15,7 @@ public final class BusinessAccount extends Account {
     private double depositLimit;
     private List<BusinessAccountTransaction> businessTrasactions;
 
-    public BusinessAccount(final CommandInput command, User user) {
+    public BusinessAccount(final CommandInput command, final User user) {
         super(command, user);
         managers = new ArrayList<>();
         employees = new ArrayList<>();
@@ -28,16 +28,8 @@ public final class BusinessAccount extends Account {
         // No interest for business accounts
     }
 
-    public void setOwner(String owner) {
+    public void setOwner(final String owner) {
         this.owner = owner;
-    }
-
-    public void addManager(String manager) {
-        managers.add(manager);
-    }
-
-    public void addEmployee(String employee) {
-        employees.add(employee);
     }
 
     public String getOwner() {
@@ -56,7 +48,7 @@ public final class BusinessAccount extends Account {
         return spendingLimit;
     }
 
-    public void setSpendingLimit(double spendingLimit) {
+    public void setSpendingLimit(final double spendingLimit) {
         this.spendingLimit = spendingLimit;
     }
 
@@ -64,45 +56,96 @@ public final class BusinessAccount extends Account {
         return depositLimit;
     }
 
-    public void setDepositLimit(double depositLimit) {
+    public void setDepositLimit(final double depositLimit) {
         this.depositLimit = depositLimit;
     }
 
-    public void addBusinessTransaction(BusinessAccountTransaction transaction) {
+    /**
+     * Add a manager to the business account
+     * @param manager
+     */
+    public void addManager(final String manager) {
+        managers.add(manager);
+    }
+
+    /**
+     * Add an employee to the business account
+     * @param employee
+     */
+    public void addEmployee(final String employee) {
+        employees.add(employee);
+    }
+
+    /**
+     * Add a business transaction to the account
+     * @param transaction
+     */
+    public void addBusinessTransaction(final BusinessAccountTransaction transaction) {
         businessTrasactions.add(transaction);
     }
 
-    public boolean hasUser(String email) {
+    /**
+     * Check if a user is part of the business account
+     * @param email
+     * @return
+     */
+    public boolean hasUser(final String email) {
         return owner.equals(email) || managers.contains(email) || employees.contains(email);
     }
 
-    public double getUserDeposit(String email, int startTimestamp, int endTimestamp) {
+    /**
+     * Get the deposit for a user in a given time interval
+     * @param email
+     * @param startTimestamp
+     * @param endTimestamp
+     * @return
+     */
+    public double getUserDeposit(final String email, final int startTimestamp,
+                                 final int endTimestamp) {
         double deposit = 0;
         for (BusinessAccountTransaction transaction : businessTrasactions) {
             if (transaction.getSenderEmail().equals(email) && transaction.getSpentAmount() < 0
-                    && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp) {
+                && transaction.getTimestamp() >= startTimestamp
+                && transaction.getTimestamp() <= endTimestamp) {
                 deposit += transaction.getSpentAmount();
             }
         }
         return -deposit;
     }
 
-    public double getUserSpentAmount(String email, int startTimestamp, int endTimestamp) {
+    /**
+     * Get the spent amount for a user in a given time interval
+     * @param email
+     * @param startTimestamp
+     * @param endTimestamp
+     * @return
+     */
+    public double getUserSpentAmount(final String email, final int startTimestamp,
+                                     final int endTimestamp) {
         double spentAmount = 0;
         for (BusinessAccountTransaction transaction : businessTrasactions) {
             if (transaction.getSenderEmail().equals(email) && transaction.getSpentAmount() > 0
-                    && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp) {
+                && transaction.getTimestamp() >= startTimestamp
+                && transaction.getTimestamp() <= endTimestamp) {
                 spentAmount += transaction.getSpentAmount();
             }
         }
         return spentAmount;
     }
 
-    public List<String> getAllPaidCommerciants(int startTimestamp, int endTimestamp) {
+    /**
+     * Get all the paid commerciants in a given time interval
+     * @param startTimestamp
+     * @param endTimestamp
+     * @return
+     */
+    public List<String> getAllPaidCommerciants(final int startTimestamp, final int endTimestamp) {
         List<String> paidCommerciants = new ArrayList<>();
         for (BusinessAccountTransaction transaction : businessTrasactions) {
-            if (transaction.getSpentAmount() > 0 && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp
-                && !paidCommerciants.contains(transaction.getReceiverCommerciant()) && !transaction.getReceiverCommerciant().isEmpty()
+            if (transaction.getSpentAmount() > 0 && transaction.getTimestamp() >= startTimestamp
+                && transaction.getTimestamp() <= endTimestamp
+                && !paidCommerciants.contains(transaction.getReceiverCommerciant())
+                && !transaction.getReceiverCommerciant().isEmpty()
                 && !transaction.getSenderEmail().equals(owner)) {
                 paidCommerciants.add(transaction.getReceiverCommerciant());
             }
@@ -112,34 +155,66 @@ public final class BusinessAccount extends Account {
         return paidCommerciants;
     }
 
-    public double getCommerciantSpentAmount(String commerciant, int startTimestamp, int endTimestamp) {
+    /**
+     * Get the spent amount for a commerciant in a given time interval
+     * @param commerciant
+     * @param startTimestamp
+     * @param endTimestamp
+     * @return
+     */
+    public double getCommerciantSpentAmount(final String commerciant,
+                                            final int startTimestamp,
+                                            final int endTimestamp) {
         double spentAmount = 0;
         for (BusinessAccountTransaction transaction : businessTrasactions) {
-            if (transaction.getReceiverCommerciant().equals(commerciant) && transaction.getSpentAmount() > 0
-                    && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp
-                    && !transaction.getSenderEmail().equals(owner)) {
+            if (transaction.getReceiverCommerciant().equals(commerciant)
+                && transaction.getSpentAmount() > 0 && transaction.getTimestamp() >= startTimestamp
+                && transaction.getTimestamp() <= endTimestamp
+                && !transaction.getSenderEmail().equals(owner)) {
                 spentAmount += transaction.getSpentAmount();
             }
         }
         return spentAmount;
     }
 
-    public List<String> getManagersForCommerciant(String commerciant, int startTimestamp, int endTimestamp) {
+    /**
+     * Get the managers for a commerciant in a given time interval
+     * @param commerciant
+     * @param startTimestamp
+     * @param endTimestamp
+     * @return
+     */
+    public List<String> getManagersForCommerciant(final String commerciant,
+                                                  final int startTimestamp,
+                                                  final int endTimestamp) {
         List<String> managersForCommerciant = new ArrayList<>();
         for (BusinessAccountTransaction transaction : businessTrasactions) {
-            if (transaction.getReceiverCommerciant().equals(commerciant) && managers.contains(transaction.getSenderEmail())
-                    && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp) {
+            if (transaction.getReceiverCommerciant().equals(commerciant)
+                && managers.contains(transaction.getSenderEmail())
+                && transaction.getTimestamp() >= startTimestamp
+                && transaction.getTimestamp() <= endTimestamp) {
                 managersForCommerciant.add(transaction.getSenderEmail());
             }
         }
         return managersForCommerciant;
     }
 
-    public List<String> getEmployeesForCommerciant(String commerciant, int startTimestamp, int endTimestamp) {
+    /**
+     * Get the employees for a commerciant in a given time interval
+     * @param commerciant
+     * @param startTimestamp
+     * @param endTimestamp
+     * @return
+     */
+    public List<String> getEmployeesForCommerciant(final String commerciant,
+                                                   final int startTimestamp,
+                                                   final int endTimestamp) {
         List<String> employeesForCommerciant = new ArrayList<>();
         for (BusinessAccountTransaction transaction : businessTrasactions) {
-            if (transaction.getReceiverCommerciant().equals(commerciant) && employees.contains(transaction.getSenderEmail())
-                    && transaction.getTimestamp() >= startTimestamp && transaction.getTimestamp() <= endTimestamp) {
+            if (transaction.getReceiverCommerciant().equals(commerciant)
+                && employees.contains(transaction.getSenderEmail())
+                && transaction.getTimestamp() >= startTimestamp
+                && transaction.getTimestamp() <= endTimestamp) {
                 employeesForCommerciant.add(transaction.getSenderEmail());
             }
         }
