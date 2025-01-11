@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.fileio.CommandInput;
 
-public class CardDestroyedTransaction extends Transaction{
+public final class CardDestroyedTransaction extends Transaction {
     private String cardNumber;
     private String cardHolder;
 
-    public CardDestroyedTransaction(CommandInput command) {
+    public CardDestroyedTransaction(final CommandInput command) {
         super(command.getTimestamp(), "The card has been destroyed", command.getAccount());
         setTransactionType("cardDestroyed");
         this.cardNumber = command.getCardNumber();
@@ -16,7 +16,7 @@ public class CardDestroyedTransaction extends Transaction{
     }
 
     @Override
-    public void printJSONObject(ArrayNode transactionsArray) {
+    public void printJSONObject(final ArrayNode transactionsArray) {
         ObjectNode transaction = transactionsArray.addObject();
         transaction.put("timestamp", getTimestamp());
         transaction.put("description", getDescription());
@@ -26,12 +26,12 @@ public class CardDestroyedTransaction extends Transaction{
     }
 
     @Override
-    public boolean checkTransactionForAccount(String accountNumber) {
+    public boolean checkTransactionForAccount(final String accountNumber) {
         return accountNumber.equals(getOriginAccount());
     }
 
     @Override
-    public void splitAmount(int numberOfAccounts) {
+    public void splitAmount(final int numberOfAccounts) {
         // Do nothing
     }
 }

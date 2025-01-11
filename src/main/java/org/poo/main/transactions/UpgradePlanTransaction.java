@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.fileio.CommandInput;
 
-public class UpgradePlanTransaction extends Transaction {
+public final class UpgradePlanTransaction extends Transaction {
     private final String newPlan;
 
-    public UpgradePlanTransaction(CommandInput command) {
+    public UpgradePlanTransaction(final CommandInput command) {
         super(command.getTimestamp(), "Upgrade plan", command.getAccount());
         setTransactionType("upgradePlan");
         this.newPlan = command.getNewPlanType();
     }
 
     @Override
-    public void printJSONObject(ArrayNode transactionsArray) {
+    public void printJSONObject(final ArrayNode transactionsArray) {
         ObjectNode transactionObject = transactionsArray.addObject();
         transactionObject.put("timestamp", getTimestamp());
         transactionObject.put("description", getDescription());
@@ -23,12 +23,12 @@ public class UpgradePlanTransaction extends Transaction {
     }
 
     @Override
-    public boolean checkTransactionForAccount(String accountNumber) {
+    public boolean checkTransactionForAccount(final String accountNumber) {
         return accountNumber.equals(getOriginAccount());
     }
 
     @Override
-    public void splitAmount(int numberOfAccounts) {
+    public void splitAmount(final int numberOfAccounts) {
         // Do nothing
     }
 }

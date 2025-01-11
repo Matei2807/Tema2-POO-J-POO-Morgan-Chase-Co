@@ -200,7 +200,7 @@ public abstract class Account {
 
         double cashback = commerciant.getCashbackStrategy().
                           getCashback(getTransactionInfoForCashback(commerciant),
-                          commerciant.getType(), user, amount);
+                          commerciant.getType(), this, user, amount);
 
         if (user.checkPlanUpgrade(amount)) {
             command.setNewPlanType("gold");
@@ -258,5 +258,21 @@ public abstract class Account {
      */
     public TransactionInfoForCashback getTransactionInfoForCashback(final Commerciant commerciant) {
         return commerciants.get(commerciant);
+    }
+
+    /**
+     * Adds a transaction to the account
+     * @param spentAmount
+     */
+    public void addTransactionInfoForSpendingThreshold(final double spentAmount) {
+        transactionInfoForSpendingThreshold.addTransaction(spentAmount);
+    }
+
+    /**
+     * Get the transaction info for spending threshold
+     * @return the transaction info for spending threshold
+     */
+    public TransactionInfoForCashback getTransactionInfoForSpendingThreshold() {
+        return transactionInfoForSpendingThreshold;
     }
 }

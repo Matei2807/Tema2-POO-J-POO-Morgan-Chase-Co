@@ -29,6 +29,14 @@ import java.util.Objects;
 import java.util.Queue;
 
 public final class Bank {
+    static final double COMMISSION_SILVER = 1.001;
+    static final double COMMISSION_STANDARD = 1.002;
+    static final int RON_THRESHOLD = 500;
+    static final int SMALL_FEE = 100;
+    static final int MEDIUM_FEE = 250;
+    static final int BIG_FEE = 350;
+    static final int MIN_AGE = 21;
+
     private List<User> users = new ArrayList<>();
     private List<ExchangeRate> exchangeRates = new ArrayList<>();
     private Map<String, String> aliases = new HashMap<>(); // map alias -> accountNumber
@@ -37,6 +45,10 @@ public final class Bank {
 
     private static Bank instance = null; // Singleton Pattern
 
+    /**
+     * Returns the user with the given email.
+     * @return
+     */
     public static Bank getInstance() {
         if (instance == null) {
             instance = new Bank();
@@ -44,8 +56,12 @@ public final class Bank {
         return instance;
     }
 
-    private Bank() {}
+    private Bank() { }
 
+    /**
+     * Updates the bank's data with the input data.
+     * @param inputData
+     */
     public void updateData(final ObjectInput inputData) {
         users.clear();
         exchangeRates.clear();
@@ -60,7 +76,7 @@ public final class Bank {
             commerciants.add(new Commerciant(commerciantInput));
         }
 
-        if(inputData.getExchangeRates() != null) {
+        if (inputData.getExchangeRates() != null) {
             for (ExchangeInput exchangeInput : inputData.getExchangeRates()) {
                 exchangeRates.add(new ExchangeRate(exchangeInput));
 
@@ -173,7 +189,7 @@ public final class Bank {
         }
     }
 
-    private void cashWithdrawal(CommandInput command, ArrayNode output) {
+    private void cashWithdrawal(final CommandInput command, final ArrayNode output) {
         String cardNumber = command.getCardNumber();
         double amountInRon = command.getAmount();
         String email = command.getEmail();
@@ -214,15 +230,17 @@ public final class Bank {
             planType = owner.getPlan();
         }
 
+        System.out.print("Time withdraw: " + command.getTimestamp() + " ");
         withdrawAmountInCurrency = addCommission(withdrawAmountInCurrency, amountInRon, planType);
 
         account.deductFunds(withdrawAmountInCurrency);
 
-        Transaction transaction = TransactionFactory.createTransaction(command, "cashWithdrawal", "");
+        Transaction transaction = TransactionFactory.createTransaction(command, "cashWithdrawal",
+                                                                       "");
         user.addTransaction(transaction);
     }
 
-    private void changeDepositLimit(CommandInput command, ArrayNode output) {
+    private void changeDepositLimit(final CommandInput command, final ArrayNode output) {
         String account = command.getAccount();
         String userEmail = command.getEmail();
         double amount = command.getAmount();
@@ -242,14 +260,15 @@ public final class Bank {
         //check if the user is the owner of the account
         BusinessAccount businessAccount = (BusinessAccount) userAccount;
         if (!businessAccount.getOwner().equals(userEmail)) {
-            putSimpleOutput("description", "You must be owner in order to change deposit limit.", command, output);
+            putSimpleOutput("description",
+                    "You must be owner in order to change deposit limit.", command, output);
             return;
         }
 
         businessAccount.setDepositLimit(amount);
     }
 
-    private void changeSpendingLimit(CommandInput command, ArrayNode output) {
+    private void changeSpendingLimit(final CommandInput command, final ArrayNode output) {
         String userEmail = command.getEmail();
         String accountNumber = command.getAccount();
         double amount = command.getAmount();
@@ -269,14 +288,15 @@ public final class Bank {
         BusinessAccount businessAccount = (BusinessAccount) account;
         // check if the user is the owner of the account
         if (!businessAccount.getOwner().equals(userEmail)) {
-            putSimpleOutput("description", "You must be owner in order to change spending limit.", command, output);
+            putSimpleOutput("description",
+                    "You must be owner in order to change spending limit.", command, output);
             return;
         }
 
         businessAccount.setSpendingLimit(amount);
     }
 
-    private void addNewBusinessAssociate(CommandInput command, ArrayNode output) {
+    private void addNewBusinessAssociate(final CommandInput command, final ArrayNode output) {
         String account = command.getAccount();
         String role = command.getRole();
         String associateEmail = command.getEmail();
@@ -298,7 +318,8 @@ public final class Bank {
         BusinessAccount businessAccount = (BusinessAccount) userAccount;
         //check if the associate is already added
         if ((role.equals("manager") && businessAccount.getManagers().contains(associateEmail))
-            || (role.equals("employee") && businessAccount.getEmployees().contains(associateEmail))) {
+                || (role.equals("employee")
+                    && businessAccount.getEmployees().contains(associateEmail))) {
             putSimpleOutput("description", "Associate already added", command, output);
             return;
         } else if (businessAccount.hasUser(associateEmail)) {
@@ -317,14 +338,9 @@ public final class Bank {
         if (!associate.getAccounts().contains(userAccount)) {
             associate.addAccount(userAccount);
         }
-
-        // the transactionInfoForSpendingThreshold will now be shared with the new associate(but first we combine the two)
-        User owner = getUserByEmail(businessAccount.getOwner());
-        owner.getTransactionInfoForSpendingThreshold().addTransactionInfo(associate.getTransactionInfoForSpendingThreshold());
-        associate.setTransactionInfoForSpendingThreshold(owner.getTransactionInfoForSpendingThreshold());
     }
 
-    private void withdrawSavings(CommandInput command, ArrayNode output) {
+    private void withdrawSavings(final CommandInput command, final ArrayNode output) {
         String account = command.getAccount();
         double amount = command.getAmount();
         String currency = command.getCurrency();
@@ -337,8 +353,9 @@ public final class Bank {
             return;
         }
 
-        if (user.getAge() < 21) {
-            Transaction transaction = TransactionFactory.createTransaction(command, "withdrawSavingsAgeError", "");
+        if (user.getAge() < MIN_AGE) {
+            Transaction transaction = TransactionFactory.createTransaction(
+                    command, "withdrawSavingsAgeError", "");
             user.addTransaction(transaction);
             return;
         }
@@ -349,13 +366,13 @@ public final class Bank {
         }
 
         Account currentAccount = null;
-        for (Account acc : user.getAccounts()) { // find the first current account with the given currency
+        for (Account acc : user.getAccounts()) { // find first current account with the currency
             if (acc.getType().equals("classic") && acc.getCurrency().equals(currency)) {
                 currentAccount = acc;
                 break;
             }
         }
-        if (currentAccount == null) { // if no current account with the given currency is found, find the first current account
+        if (currentAccount == null) { // find first current account
             for (Account acc : user.getAccounts()) {
                 if (acc.getType().equals("classic")) {
                     currentAccount = acc;
@@ -364,12 +381,14 @@ public final class Bank {
             }
         }
         if (currentAccount == null) { // if no current account is found
-            Transaction transaction = TransactionFactory.createTransaction(command, "noCurrentAccountError", "");
+            Transaction transaction = TransactionFactory.createTransaction(
+                    command, "noCurrentAccountError", "");
             user.addTransaction(transaction);
             return;
         }
 
-        double exchangeRate = getExchangeRate(savingsAccount.getCurrency(), currentAccount.getCurrency());
+        double exchangeRate = getExchangeRate(savingsAccount.getCurrency(),
+                                              currentAccount.getCurrency());
         double convertedAmount = amount * exchangeRate; // ammount to add in the current account
 
         if (savingsAccount.getBalance() < amount) {
@@ -383,12 +402,13 @@ public final class Bank {
         accounts.add(savingsAccount.getAccountNumber());
         accounts.add(currentAccount.getAccountNumber());
         command.setAccounts(accounts);
-        Transaction transaction = TransactionFactory.createTransaction(command, "withdrawSavings", "");
+        Transaction transaction = TransactionFactory.createTransaction(
+                command, "withdrawSavings", "");
         user.addTransaction(transaction);
         user.addTransaction(transaction);
     }
 
-    private void upgradePlan(CommandInput command, ArrayNode output) {
+    private void upgradePlan(final CommandInput command, final ArrayNode output) {
         String newPlanType = command.getNewPlanType();
         String account = command.getAccount();
         int timestamp = command.getTimestamp();
@@ -402,7 +422,8 @@ public final class Bank {
 
         String currentPlan = user.getPlan();
         if (currentPlan.equals(newPlanType)) {
-            Transaction transaction = TransactionFactory.createTransaction(command, "upgradePlanError", "samePlan");
+            Transaction transaction = TransactionFactory.createTransaction(
+                    command, "upgradePlanError", "samePlan");
             user.addTransaction(transaction);
             return;
         }
@@ -416,7 +437,8 @@ public final class Bank {
                 }
                 break;
             case "gold":
-                if (newPlanType.equals("standard") || newPlanType.equals("student") || newPlanType.equals("silver")) {
+                if (newPlanType.equals("standard") || newPlanType.equals("student")
+                        || newPlanType.equals("silver")) {
                     downgrade = true;
                 }
                 break;
@@ -424,7 +446,6 @@ public final class Bank {
                 break;
         }
         if (downgrade) {
-            //TODO: create the transaction??
             return;
         }
 
@@ -434,14 +455,14 @@ public final class Bank {
             case "standard":
             case "student":
                 if (newPlanType.equals("silver")) {
-                    fee = 100;
+                    fee = SMALL_FEE;
                 } else if (newPlanType.equals("gold")) {
-                    fee = 350;
+                    fee = BIG_FEE;
                 }
                 break;
             case "silver":
                 if (newPlanType.equals("gold")) {
-                    fee = 250;
+                    fee = MEDIUM_FEE;
                 }
                 break;
             default:
@@ -482,7 +503,8 @@ public final class Bank {
             if (!Objects.isNull(user.getAccounts())) {
                 for (Account account : user.getAccounts()) {
                     // if account is for business, we only print for the owner
-                    if (account.getType().equals("business") && !((BusinessAccount) account).getOwner().equals(user.getEmail())) {
+                    if (account.getType().equals("business")
+                            && !((BusinessAccount) account).getOwner().equals(user.getEmail())) {
                         continue;
                     }
 
@@ -547,9 +569,9 @@ public final class Bank {
             newAccount = new CurrentAccount(command, user);
         } else { // business account
             newAccount = new BusinessAccount(command, user);
-            double exchangeRate = getExchangeRate("RON", currency); // set the deposit and spending limit
-            ((BusinessAccount) newAccount).setDepositLimit(500 * exchangeRate);
-            ((BusinessAccount) newAccount).setSpendingLimit(500 * exchangeRate);
+            double exchangeRate = getExchangeRate("RON", currency); // setting the limits
+            ((BusinessAccount) newAccount).setDepositLimit(RON_THRESHOLD * exchangeRate);
+            ((BusinessAccount) newAccount).setSpendingLimit(RON_THRESHOLD * exchangeRate);
         }
         user.addAccount(newAccount);
 
@@ -570,18 +592,19 @@ public final class Bank {
         // checks if it is a business account and the deposit limit
         if (account.getType().equals("business")) {
             BusinessAccount businessAccount = (BusinessAccount) account;
-            if (businessAccount.getDepositLimit() < amount && businessAccount.getEmployees().contains(email)) {
-                // TODO: create the transaction??
+            if (businessAccount.getDepositLimit() < amount
+                    && businessAccount.getEmployees().contains(email)) {
                 return;
             } else if (!businessAccount.hasUser(email)) {
                 return;
             }
             // adds special transaction for business account
-            BusinessAccountTransaction businessTransaction = new BusinessAccountTransaction(timestamp, email, "", -amount);
+            BusinessAccountTransaction businessTransaction = new BusinessAccountTransaction(
+                    timestamp, email, "", -amount);
             businessAccount.addBusinessTransaction(businessTransaction);
         }
 
-        if(account.isNull()) {
+        if (account.isNull()) {
             return;
         }
         account.addFunds(amount);
@@ -623,7 +646,9 @@ public final class Bank {
         if (account.isNull()) {
             return;
         } else if (account.getBalance() != 0) { // if the account has funds - error
-            putSimpleOutput("error", "Account couldn't be deleted - see org.poo.transactions for details", command, output);
+            putSimpleOutput("error",
+                    "Account couldn't be deleted - see org.poo.transactions for details",
+                    command, output);
             Transaction transaction = TransactionFactory.createTransaction(command,
                                                              "deleteAccountError",
                                                                 "");
@@ -637,7 +662,6 @@ public final class Bank {
         if (account.getType().equals("business")) {
             BusinessAccount businessAccount = (BusinessAccount) account;
             if (!businessAccount.getOwner().equals(email)) {
-                // TODO: create the transaction??
                 return;
             }
         }
@@ -674,11 +698,9 @@ public final class Bank {
             return;
         }
 
-        // checks if the user is the owner of the card or if the user is a manager/owner of the business account
         if (account.getType().equals("business")) {
             BusinessAccount businessAccount = (BusinessAccount) account;
-            if (!businessAccount.getOwner().equals(email) && !businessAccount.getManagers().contains(email)
-                && !businessAccount.getCard(cardNumber).getOwnerEmail().equals(email)) {
+            if (!businessAccount.hasUser(email)) {
                 return;
             }
         }
@@ -713,12 +735,6 @@ public final class Bank {
 
         account.setMinBalance(minBalance);
         account.setMinBalanceTimestamp(timestamp);
-//        if (account.getBalance() < minBalance) { // TODO : check if it should be blocked
-//            for (Card card : account.getCards()) {
-//                System.out.println("Card " + card.getCardNumber() + " will be blocked because of low balance time: " + timestamp);
-//                card.setStatus("frozen");
-//            }
-//        }
     }
 
     private void checkCardStatus(final CommandInput command, final ArrayNode output) {
@@ -793,6 +809,8 @@ public final class Bank {
             System.out.println("Changing plan " + planType + " to " + owner.getPlan());
             planType = owner.getPlan();
         }
+
+        System.out.print("Time pay online: " + timestamp + " ");
         convertedAmount = addCommission(convertedAmount, spentAmountInRON, planType);
 
         // if it is a business acount check the spending limit
@@ -802,8 +820,11 @@ public final class Bank {
             if (!businessAccount.hasUser(email)) {
                 putSimpleOutput("description", "Card not found", command, output);
                 return;
-            } else if (businessAccount.getSpendingLimit() < convertedAmount && !businessAccount.getOwner().equals(email) && !businessAccount.getManagers().contains(email)) {
-                Transaction transaction = TransactionFactory.createTransaction(command, "noFunds", "");
+            } else if (businessAccount.getSpendingLimit() < convertedAmount
+                    && !businessAccount.getOwner().equals(email)
+                    && !businessAccount.getManagers().contains(email)) {
+                Transaction transaction = TransactionFactory.createTransaction(
+                        command, "noFunds", "");
                 user.addTransaction(transaction);
                 return;
             }
@@ -854,12 +875,13 @@ public final class Bank {
 
         spentAmountInRON = amount * exchangeRateRON;
         System.out.println("Spent amount in RON: " + spentAmountInRON);
-        double cashback = account.addCommerciantTransaction(commerciantToAdd , spentAmountInRON, user, command) * convertedAmountPreCommission;
+        double cashback = account.addCommerciantTransaction(
+                commerciantToAdd, spentAmountInRON, user, command) * convertedAmountPreCommission;
         account.addFunds(cashback);
-        System.out.println("Found cashback: " + cashback + " for: " + email + " and " + commerciantName + " time: " + timestamp + " percent: " + cashback / convertedAmountPreCommission * 100 + " strategy: " + commerciantToAdd.getCashbackStrategy().getClass().getSimpleName());
-
-        if (account.getAccountNumber().equals("RO53POOB7122855990652257"))
-            System.out.println("ACCOUNT!!!");
+        System.out.println("Found cashback: " + cashback + " for: " + email + " and "
+                + commerciantName + " time: " + timestamp + " percent: "
+                + cashback / convertedAmountPreCommission * 100 + " strategy: "
+                + commerciantToAdd.getCashbackStrategy().getClass().getSimpleName());
 
         if (card.isOneTime()) {
             // delete the card
@@ -882,7 +904,8 @@ public final class Bank {
         // if it is a business account, add the transaction to the business account
         if (account.getType().equals("business")) {
             BusinessAccount businessAccount = (BusinessAccount) account;
-            BusinessAccountTransaction businessTransaction = new BusinessAccountTransaction(timestamp, email, commerciantName, convertedAmountPreCommission);
+            BusinessAccountTransaction businessTransaction = new BusinessAccountTransaction(
+                    timestamp, email, commerciantName, convertedAmountPreCommission);
             businessAccount.addBusinessTransaction(businessTransaction);
         }
     }
@@ -936,14 +959,18 @@ public final class Bank {
             planType = owner.getPlan();
         }
 
+        System.out.print("Time send money: " + timestamp + " ");
         amount = addCommission(amount, spentAmountInRON, planType);
 
         // if it is a business acount check the spending limit
         if (sender.getType().equals("business")) {
             String senderEmail = command.getEmail();
             BusinessAccount businessAccount = (BusinessAccount) sender;
-            if (businessAccount.getSpendingLimit() < amount && !businessAccount.getOwner().equals(senderEmail) && !businessAccount.getManagers().contains(senderEmail)) {
-                Transaction transaction = TransactionFactory.createTransaction(command, "noFunds", "");
+            if (businessAccount.getSpendingLimit() < amount
+                    && !businessAccount.getOwner().equals(senderEmail)
+                    && !businessAccount.getManagers().contains(senderEmail)) {
+                Transaction transaction = TransactionFactory.createTransaction(command, "noFunds",
+                                                                    "");
                 User user = getUserByEmail(senderEmail);
                 user.addTransaction(transaction);
                 return;
@@ -978,19 +1005,20 @@ public final class Bank {
         if (commerciant != null) {
             // add the sale to the commerciant in the account and add the cashback
             commerciant.addSale(convertedAmount);
-            double cashback = sender.addCommerciantTransaction(commerciant, spentAmountInRON, senderUser, command) * amountPreCommission;
-            System.out.println("Found cashback: " + cashback + " for: " + senderUser.getEmail() + " and " + commerciant.getName() + " time: " + timestamp + " on sendMoney");
+            double cashback = sender.addCommerciantTransaction(
+                    commerciant, spentAmountInRON, senderUser, command) * amountPreCommission;
+            System.out.println("Found cashback: " + cashback + " for: " + senderUser.getEmail()
+                               + " and " + commerciant.getName() + " time: " + timestamp
+                               + " on sendMoney");
             sender.addFunds(cashback);
         }
-
-        if (sender.getAccountNumber().equals("RO53POOB7122855990652257"))
-            System.out.println("ACCOUNT!!!");
 
         // if it is a business account, add the transaction to the business account
         if (sender.getType().equals("business")) {
             BusinessAccount businessAccount = (BusinessAccount) sender;
             String commerciantName = (commerciant == null) ? "" : commerciant.getName();
-            BusinessAccountTransaction businessTransaction = new BusinessAccountTransaction(timestamp, senderUser.getEmail(), commerciantName, amountPreCommission);
+            BusinessAccountTransaction businessTransaction = new BusinessAccountTransaction(
+                    timestamp, senderUser.getEmail(), commerciantName, amountPreCommission);
             businessAccount.addBusinessTransaction(businessTransaction);
         }
     }
@@ -1001,15 +1029,16 @@ public final class Bank {
         aliases.put(alias, accountNumber);
     }
 
-    private void rejectSplitPayment(CommandInput command, ArrayNode output) {
+    private void rejectSplitPayment(final CommandInput command, final ArrayNode output) {
         String email = command.getEmail();
         int timestamp = command.getTimestamp();
 
-        // goes through the split payment queue and find the first split payment with the given email
+        // goes through the payment queue and find the first split payment with the given email
         User user = getUserByEmail(email);
         SplitPayment splitPaymentToRemove = null;
         for (SplitPayment splitPayment : splitPaymentQueue) {
-            if (splitPayment.hasUser(user) && !splitPayment.hasAccepted(user) && !splitPayment.hasRejected(user)) {
+            if (splitPayment.hasUser(user) && !splitPayment.hasAccepted(user)
+                && !splitPayment.hasRejected(user)) {
                 splitPayment.rejectAccount(email);
                 if (!splitPayment.isRejected()) {
                     return;
@@ -1032,8 +1061,10 @@ public final class Bank {
         List<Double> amountsForAccounts = splitPaymentToRemove.getAmountsForAccounts();
         String type = splitPaymentToRemove.getSplitPaymentType();
         timestamp = splitPaymentToRemove.getTimestamp();
-        CommandInput commandReject = new CommandInput(currency, amount, accounts, amountsForAccounts, type, timestamp);
-        Transaction transaction = TransactionFactory.createTransaction(commandReject, "splitTransaction", "errorRejected");
+        CommandInput commandReject = new CommandInput(currency, amount, accounts,
+                                                      amountsForAccounts, type, timestamp);
+        Transaction transaction = TransactionFactory.createTransaction(commandReject,
+                                                         "splitTransaction", "errorRejected");
 
         // add the transaction to all the users that have to pay
         for (String account : splitPaymentToRemove.getAccounts()) {
@@ -1042,16 +1073,17 @@ public final class Bank {
         }
     }
 
-    private void acceptSplitPayment(CommandInput command, ArrayNode output) {
+    private void acceptSplitPayment(final CommandInput command, final ArrayNode output) {
         String email = command.getEmail();
         int timestamp = command.getTimestamp();
 
-        // goes through the split payment queue and find the first split payment with the given email
+        // goes through the payment queue and finds the first split payment with the given email
         User user = getUserByEmail(email);
         SplitPayment acceptedSplitPayment = null;
         for (SplitPayment splitPayment : splitPaymentQueue) {
             // also check if this user has already accepted the split payment
-            if (splitPayment.hasUser(user) && !splitPayment.hasAccepted(user) && !splitPayment.hasRejected(user)) {
+            if (splitPayment.hasUser(user) && !splitPayment.hasAccepted(user)
+                && !splitPayment.hasRejected(user)) {
                 splitPayment.acceptAccount(email);
                 acceptedSplitPayment = splitPayment;
                 if (splitPayment.isAccepted()) { // the split payment is accepted
@@ -1104,7 +1136,7 @@ public final class Bank {
 
             double splitAmount = amountsForAccounts.get(index);
             double convertedAmount = splitAmount * exchangeRate;
-            if (account.getBalance() < convertedAmount && !insufficientFunds) { // checks if the account has enough funds
+            if (account.getBalance() < convertedAmount && !insufficientFunds) {
                 insufficientFunds = true;
                 insufficientAccount = accountNumber;
             }
@@ -1113,7 +1145,8 @@ public final class Bank {
 
         if (insufficientFunds) {
             for (Account account : accountList) {
-                CommandInput command = new CommandInput(currency, amount, accounts, amountsForAccounts, type, timestamp);
+                CommandInput command = new CommandInput(currency, amount, accounts,
+                                                        amountsForAccounts, type, timestamp);
 
                 command.setAccount(insufficientAccount);
                 Transaction transaction = TransactionFactory.createTransaction(command,
@@ -1133,7 +1166,8 @@ public final class Bank {
             double splitAmount = amountsForAccounts.get(index);
             account.deductFunds(splitAmount * exchangeRate);
 
-            CommandInput command = new CommandInput(currency, amount, accounts, amountsForAccounts, type, timestamp);
+            CommandInput command = new CommandInput(currency, amount, accounts,
+                                                    amountsForAccounts, type, timestamp);
             command.setCurrency(currency);
             Transaction transaction = TransactionFactory.createTransaction(command,
                     "splitTransaction",
@@ -1367,8 +1401,10 @@ public final class Bank {
         double totalDeposited = 0;
 
         for (String manager : managers) {
-            double spent = businessAccount.getUserSpentAmount(manager, startTimestamp, endTimestamp);
-            double deposited = businessAccount.getUserDeposit(manager, startTimestamp, endTimestamp);
+            double spent = businessAccount.getUserSpentAmount(manager, startTimestamp,
+                                                              endTimestamp);
+            double deposited = businessAccount.getUserDeposit(manager, startTimestamp,
+                                                              endTimestamp);
             totalSpent += spent;
             totalDeposited += deposited;
 
@@ -1382,8 +1418,10 @@ public final class Bank {
         }
 
         for (String employee : employees) {
-            double spent = businessAccount.getUserSpentAmount(employee, startTimestamp, endTimestamp);
-            double deposited = businessAccount.getUserDeposit(employee, startTimestamp, endTimestamp);
+            double spent = businessAccount.getUserSpentAmount(employee, startTimestamp,
+                                                              endTimestamp);
+            double deposited = businessAccount.getUserDeposit(employee, startTimestamp,
+                                                              endTimestamp);
             totalSpent += spent;
             totalDeposited += deposited;
 
@@ -1431,17 +1469,24 @@ public final class Bank {
         accountNode.put("statistics type", "commerciant");
 
         ArrayNode commerciantsArray = accountNode.putArray("commerciants");
-        List<String> commerciantsNames = businessAccount.getAllPaidCommerciants(startTimestamp, endTimestamp);
+        List<String> commerciantsNames = businessAccount.getAllPaidCommerciants(startTimestamp,
+                                                                                endTimestamp);
         for (String commerciantName : commerciantsNames) {
-            double amount = businessAccount.getCommerciantSpentAmount(commerciantName, startTimestamp, endTimestamp);
+            double amount = businessAccount.getCommerciantSpentAmount(commerciantName,
+                                                                      startTimestamp,
+                                                                      endTimestamp);
             ObjectNode commerciantNode = commerciantsArray.objectNode();
             commerciantNode.put("commerciant", commerciantName);
             commerciantNode.put("total received", amount);
             ArrayNode managersArray = commerciantNode.putArray("managers");
             ArrayNode employeesArray = commerciantNode.putArray("employees");
 
-            List<String> managers = businessAccount.getManagersForCommerciant(commerciantName, startTimestamp, endTimestamp);
-            List<String> employees = businessAccount.getEmployeesForCommerciant(commerciantName, startTimestamp, endTimestamp);
+            List<String> managers = businessAccount.getManagersForCommerciant(commerciantName,
+                                                                              startTimestamp,
+                                                                              endTimestamp);
+            List<String> employees = businessAccount.getEmployeesForCommerciant(commerciantName,
+                                                                                startTimestamp,
+                                                                                endTimestamp);
 
             for (String manager : managers) {
                 User user = getUserByEmail(manager);
@@ -1460,7 +1505,8 @@ public final class Bank {
         output.add(commandOutput);
     }
 
-    private void putSimpleOutput(final String propertyName, final String description, final CommandInput command, final ArrayNode output) {
+    private void putSimpleOutput(final String propertyName, final String description,
+                                 final CommandInput command, final ArrayNode output) {
         ObjectNode commandOutput = output.objectNode();
         commandOutput.put("command", command.getCommand());
         ObjectNode accountNode = commandOutput.putObject("output");
@@ -1473,12 +1519,12 @@ public final class Bank {
     private double addCommission(final double amount, final double amountInRon, final String plan) {
         switch (plan) {
             case "standard":
-                System.out.println("Adding commision : " + 0.002 * amount);
-                return amount * 1.002;
+                System.out.println("Adding commision : " + (COMMISSION_STANDARD - 1) * amount);
+                return amount * COMMISSION_STANDARD;
             case "silver":
-                if (amountInRon >= 500) {
-                    System.out.println("Adding commision : " + 0.001 * amount);
-                    return amount * 1.001;
+                if (amountInRon >= RON_THRESHOLD) {
+                    System.out.println("Adding commision : " + (COMMISSION_SILVER - 1) * amount);
+                    return amount * COMMISSION_SILVER;
                 }
             default:
                 break;

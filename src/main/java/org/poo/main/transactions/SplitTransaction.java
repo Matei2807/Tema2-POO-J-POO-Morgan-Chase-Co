@@ -49,8 +49,8 @@ public final class SplitTransaction extends Transaction {
             transactionObject.put("amount", amount);
         } else {
             ArrayNode amountsForAccountsArray = transactionObject.putArray("amountForUsers");
-            for (Double amount : amountsForAccounts) {
-                amountsForAccountsArray.add(amount);
+            for (Double amountForAccount : amountsForAccounts) {
+                amountsForAccountsArray.add(amountForAccount);
             }
         }
 

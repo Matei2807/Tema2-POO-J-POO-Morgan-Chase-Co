@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.fileio.CommandInput;
 
-public class AddInterestTransaction extends Transaction{
+public final class AddInterestTransaction extends Transaction {
     private double amount;
     private String currency;
 
-    public AddInterestTransaction(CommandInput command) {
+    public AddInterestTransaction(final CommandInput command) {
         super(command.getTimestamp(), "Interest rate income", command.getAccount());
         setTransactionType("addInterest");
         this.amount = command.getAmount();
@@ -16,21 +16,21 @@ public class AddInterestTransaction extends Transaction{
     }
 
     @Override
-    public void printJSONObject(ArrayNode transactionsArray) {
+    public void printJSONObject(final ArrayNode transactionsArray) {
         ObjectNode transaction = transactionsArray.addObject();
         transaction.put("timestamp", getTimestamp());
         transaction.put("description", getDescription());
-        transaction.put("amount",amount);
+        transaction.put("amount", amount);
         transaction.put("currency", currency);
     }
 
     @Override
-    public boolean checkTransactionForAccount(String accountNumber) {
+    public boolean checkTransactionForAccount(final String accountNumber) {
         return accountNumber.equals(getOriginAccount());
     }
 
     @Override
-    public void splitAmount(int numberOfAccounts) {
+    public void splitAmount(final int numberOfAccounts) {
         // Do nothing
     }
 }

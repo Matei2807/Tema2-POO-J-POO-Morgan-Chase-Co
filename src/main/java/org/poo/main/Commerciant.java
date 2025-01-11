@@ -18,12 +18,13 @@ public final class Commerciant {
         this.totalSales = 0;
     }
 
-    public Commerciant(CommerciantInput commerciantInput) {
+    public Commerciant(final CommerciantInput commerciantInput) {
         name = commerciantInput.getCommerciant();
         id = commerciantInput.getId();
         account = commerciantInput.getAccount();
         type = commerciantInput.getType();
-        cashbackStrategy = commerciantInput.getCashbackStrategy().equals("nrOfTransactions") ? new NrOfTransactionsStrategy() : new SpendingThresholdStrategy();
+        cashbackStrategy = commerciantInput.getCashbackStrategy().equals("nrOfTransactions")
+                ? new NrOfTransactionsStrategy() : new SpendingThresholdStrategy();
         totalSales = 0;
     }
 

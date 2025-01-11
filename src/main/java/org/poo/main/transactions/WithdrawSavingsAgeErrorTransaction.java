@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.fileio.CommandInput;
 
-public class WithdrawSavingsAgeErrorTransaction extends Transaction {
+public final class WithdrawSavingsAgeErrorTransaction extends Transaction {
     public WithdrawSavingsAgeErrorTransaction(final CommandInput command) {
-        super(command.getTimestamp(), "You don't have the minimum age required.", command.getAccount());
+        super(command.getTimestamp(), "You don't have the minimum age required.",
+                command.getAccount());
         setTransactionType("withdrawSavingsAgeError");
     }
 

@@ -1,11 +1,13 @@
 package org.poo.main;
 
-public class Date {
-    int day;
-    int month;
-    int year;
+public final class Date {
+    static final int CURRENT_YEAR = 2025;
 
-    public Date(String date) {
+    private int day;
+    private int month;
+    private int year;
+
+    public Date(final String date) {
         // date is in format yyyy-mm-dd
         String[] dateParts = date.split("-");
         year = Integer.parseInt(dateParts[0]);
@@ -13,19 +15,7 @@ public class Date {
         day = Integer.parseInt(dateParts[2]);
     }
 
-    public int getDay() {
-        return day;
-    }
-
-    public int getMonth() {
-        return month;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
     public int getAge() {
-        return 2024 - year; // TODO: Ceck if this is correct
+        return CURRENT_YEAR - year;
     }
 }
